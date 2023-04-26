@@ -229,6 +229,22 @@ class SimuladorTxT:
                     valores_cadena[-1] = True
                 else:
                     valores_cadena[-1] = False
+                
+                # Si la cantidad de "" no está balanceada, entonces es un error.
+                if self.cadena_copy.count('"') % 2 != 0:
+                    
+                    # Abriendo el archivo y buscando la cadena con error.
+                    
+                    # Buscando el número de línea en donde se encuentra la cadena actual en el archivo.
+                    with open(self.archivo, "r") as archivos:
+                        for i, linea in enumerate(archivos):
+                            if cadena_actual in linea:
+                                print("Error de formato: " + cadena_actual + " line: ", i+1, " la cadena no iene comillas balanceadas")
+                    
+                    # Cambiando todos sus valores de verdad a falso.
+                    for i in range(len(valores_cadena)):
+                        valores_cadena[i] = False
+
             
             # Verificando si hay un endline en la tabla.
             if 'endline' in self.tabla:
@@ -255,7 +271,52 @@ class SimuladorTxT:
                         with open(self.archivo, "r") as archivos:
                             for i, linea in enumerate(archivos):
                                 if cadena_actual in linea:
-                                    print("Sintax error: " + cadena_actual + " line: ", i+1)
+                                    print("La cadena: " + cadena_actual + " line: ", i+1, " no termina en: ", endline)
+            
+            # Verificando si hay un number en la especificación del yalex.
+            if 'number' in self.tabla:
+                # # Obteniendo la posición del number en la tabla.
+                # pos_number = self.tabla['number']
+
+                # # Imprimiendo la posición.
+                # print("Posición del number: ", pos_number)
+
+                posicion = list(self.tabla.keys()).index('number')
+                #print("Posicón del number: ", posicion)
+
+                # Imprimiendo el valor de verdad de lo que sea que haya en sus valores.
+                #print("Valores de la cadena: ", valores_cadena[posicion], " cadena: ", cadena_actual)
+
+                # Si la cadena actual (o sea el número con decimal) tiene una coma de más o un signo de más, entonces es un error.
+                # Revisando la escritura del número.
+                num_comas = cadena_actual.count(',')
+
+                # Si hay más de una coma, entonces es un error.
+                if num_comas > 1:
+                    # Buscando el número de línea en donde se encuentra la cadena actual en el archivo.
+                    with open(self.archivo, "r") as archivos:
+                        for i, linea in enumerate(archivos):
+                            if cadena_actual in linea:
+                                print("Error de formato: " + cadena_actual + " line: ", i+1, " la cadena tiene una coma de más")
+                    
+                    # Cambiando todos sus valores de verdad a falso.
+                    for i in range(len(valores_cadena)):
+                        valores_cadena[i] = False
+                
+                # Contando la cantidad de signos + o - que pueda tener el número.
+                num_signos = cadena_actual.count('+') + cadena_actual.count('-')
+
+                # Si hay más de un signo, entonces es un error.
+                if num_signos > 1:
+                    # Buscando el número de línea en donde se encuentra la cadena actual en el archivo.
+                    with open(self.archivo, "r") as archivos:
+                        for i, linea in enumerate(archivos):
+                            if cadena_actual in linea:
+                                print("Error de formato: " + cadena_actual + " line: ", i+1, " la cadena tiene un signo de más")
+                    
+                    # Cambiando todos sus valores de verdad a falso.
+                    for i in range(len(valores_cadena)):
+                        valores_cadena[i] = False
             
             # Guardando la cadena y sus resultados en un diccionario.
             self.diccionario_cadenas[cadena_actual] = valores_cadena
@@ -265,15 +326,15 @@ class SimuladorTxT:
 
             #print("Cadena: ", cadena_actual, "resultados: ", valores_cadena)
 
-            # Verificando si hay un true en la lista de valores cadena.
-            if True in valores_cadena:
-                pass
-            else:
-                # Buscando el número de línea en donde se encuentra la cadena actual en el archivo.
-                with open(self.archivo, "r") as archivos:
-                    for i, linea in enumerate(archivos):
-                        if cadena_actual in linea:
-                            print("Sintax error: " + cadena_actual + " line: ", i+1)
+            # # Verificando si hay un true en la lista de valores cadena.
+            # if True in valores_cadena:
+            #     pass
+            # else:
+            #     # Buscando el número de línea en donde se encuentra la cadena actual en el archivo.
+            #     with open(self.archivo, "r") as archivos:
+            #         for i, linea in enumerate(archivos):
+            #             if cadena_actual in linea:
+            #                 print("Sintax error: " + cadena_actual + " line: ", i+1)
 
             # if cadena_actual in self.reservadas:
             #     # Si la cadena actual es una palabra reservada, se agrega a la lista de resultados.
