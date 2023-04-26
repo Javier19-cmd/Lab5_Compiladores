@@ -1,0 +1,265 @@
+### Dibujo del AFN
+
+def grafo(automata, lista, diccionario):
+    grafo = gv.Digraph('G', filename='grafo', format='png')
+
+    estados = [ str(estado) for estado in diccionario.keys() ]
+
+    # Dibujando los nodos.
+    for estado in estados:
+        if estado == str(automata.get_estado_inicial()):
+            grafo.node(estado, estado, color='green')
+        elif estado == str(automata.get_estado_final()):
+            grafo.node(estado, estado, color='red')
+        else:
+            grafo.node(estado, estado, color='blue')
+    
+    # Dibujando las aristas.
+    print("Estados: " + str(estados))
+
+    # Dibujando las transiciones.
+    for key, value in diccionario.items():
+        for simbolo, estado in value:
+            grafo.edge(str(key), str(estado), label=simbolo)
+
+    grafo.render('grafo', view=True)
+
+
+### Siguiente posición.
+        # # Identificando los padres e hijos del árbol.
+        # for c in arbol: 
+            
+        #     if c.etiqueta == "|":
+
+        #         print("Or: ", "Izquierda: ", c.left, "Derecha: ", c.right)
+
+        #         # Verificando si alguno de los hijos es una letra para colocar un número a la par de la letra dentro del diccionario.
+        #         if (c.left.etiqueta not in ["|", "*", "."]) and (c.right.etiqueta not in ["|", "*", "."]):
+                    
+        #             # Agregando el contador de cada elemento a su lado.
+        #             diccionario[c] = [c.left, contador, c.right, contador + 1]
+
+        #             contador += 2
+
+        #         elif c.right.etiqueta not in ["|", "*", "."]:
+
+        #             diccionario[c] = [c.left, c.right, contador]
+
+        #             contador += 1
+                
+        #         elif c.left.etiqueta not in ["|", "*", "."]:
+    
+        #             diccionario[c] = [c.left, c.right, contador]
+
+        #             contador += 1
+        #         else: 
+        #             diccionario[c] = [c.left, c.right]
+                
+
+        #     elif c.etiqueta == ".":
+
+        #         # Verificando si alguno de los hijos es una letra para colocar un número a la par de la letra dentro del diccionario.
+        #         if c.left.etiqueta not in ["|", "*", "."]:
+        #             diccionario[c] = [c.left, contador , c.right]
+        #             contador += 1
+
+        #         elif c.right.etiqueta not in ["|", "*", "."]:
+
+        #             diccionario[c] = [c.left, c.right, contador]
+
+        #             contador += 1
+                
+        #         elif (c.left.etiqueta not in ["|", "*", "."]) and (c.right.etiqueta not in ["|", "*", "."]):
+    
+        #             diccionario[c] = [c.left, c.right, contador]
+
+        #             contador += 1
+        #         else: 
+        #             diccionario[c] = [c.left, c.right]
+
+        #     elif c.etiqueta == "*":
+
+        #         print("Kleene: ", "hijo: ", c.child)
+
+        #         if c.child.etiqueta not in ["|", "*", "."]:
+        #             diccionario[c] = [c.child, contador]
+        #         else: 
+        #             diccionario[c] = [c.child]
+
+        # print("Diccionario: ", diccionario)
+
+
+        # # Calculando el anulable.
+        # for c in arbol:
+        #     resultado = self.anulable(c)
+
+        #     #print("Anulable: ", resultado)
+
+        #     # Aumentando el diccionario con los resultados del anulable.
+        #     anulable[c] = resultado
+        
+        # print("Anulable: ", anulable)
+
+        # # Haciendo una copia del diccionario.
+        # diccionario_anulable = diccionario.copy()
+
+        # # Agregando a la par de cada elemento su anulable.
+        # for c, d in diccionario_anulable.items(): 
+        #     for i in range(len(d)):
+        #         if d[i] in anulable:
+        #             d[i] = [d[i], anulable[d[i]]]
+            
+        # print("Diccionario anulable: ", diccionario_anulable)
+        # #print("Diccionario normal: ", diccionario)
+
+        # #ultimaPos = []
+
+        # diccionario_primera = diccionario.copy()
+        # # Calculando la primera posición del diccionario.
+        # for c, d in diccionario_primera.items():
+        #     for i in range(len(d)):
+        #         # Viendo cual es la lista.
+        #         if type(d[i]) == list:
+        #             # Calculando su primera posición.
+        #             primeraPos = self.primeraPosicion(d[i][0])
+
+        #             print("Primera posición: ", primeraPos)
+
+        #             # Agregando la primera posición a la par de cada elemento.
+        #             d[i] = [d[i], primeraPos]
+
+
+        # diccionario_ultima = diccionario.copy()
+
+        # # Calculando la última posición del diccionario 2.
+        # for c, d in diccionario_ultima.items():
+        #     for i in range(len(d)):
+        #         # Viendo cual es la lista.
+        #         if type(d[i]) == list:
+        #             # Calculando su primera posición.
+        #             ultimaPos = self.ultimaPosicion(d[i][0])
+
+        #             print("Primera posición: ", primeraPos)
+
+        #             # Agregando la primera posición a la par de cada elemento.
+        #             d[i] = [d[i], ultimaPos]
+        
+        # print("Diccionario_ultima: ", diccionario_ultima)
+------------------------------------------------------------------------------
+            #print(ultima_vez_token)
+
+        # # Recorriendo la lista de resultados.
+        # for i in range(len(resultado)):
+        #     print("Resultado: ", resultado[i])
+        #     # Recorriendo la lista de resultados.
+
+        # if not diccionarios:
+        #     #print("Resultado: ", resultado)
+        #     return resultado
+
+
+        # if len(self.reservadas) == 0:
+        #     # Si ya no quedan más cadenas por simular, se devuelve el resultado.
+        #     #print("Resultado: ", resultado)
+        #     return resultado
+        # else:
+
+        #     #print("Cad_s", self.cad_s)
+
+        #     # Se toma la primera cadena en la lista de cadenas.
+        #     cadena_actual = self.reservadas.pop(0)
+
+        #     #print("Cadena actual: ", cadena_actual)
+
+        #     # Se simula la cadena en cada diccionario en la lista de diccionarios.
+        #     valores_cadena = []
+        #     for i in range(len(diccionarios)):
+        #         diccionario = diccionarios[i]
+        #         estado_ini = iniciales[i]
+        #         estados_acept = finales[i]
+        #         estado_actual = estado_ini[0]
+
+        #         # Se simula la cadena en el diccionario actual.
+        #         for j in range(len(cadena_actual) - 1):
+        #             caracter_actual = cadena_actual[j]
+        #             caracter_siguiente = cadena_actual[j+1]
+
+        #             #print("Estado actual: ", estado_actual)
+
+        #             v, estado_actual = self.simular_cadena2(diccionario, estado_actual, caracter_actual, caracter_siguiente, estados_acept)
+
+        #             # if v == False:
+        #             #     valores_cadena.append(v)
+        #             #     break
+
+        #             if j == len(cadena_actual) - 2:
+        #                 valores_cadena.append(v)
+
+        #     # Se agrega la lista de valores de la cadena actual al resultado.
+        #     resultado.append(valores_cadena)
+
+        #     #print("Cadena: ", cadena_actual, "resultados: ", valores_cadena)
+
+        #     if cadena_actual in self.reservadas:
+        #         # Si la cadena actual es una palabra reservada, se agrega a la lista de resultados.
+        #         print("Palabra reservada", cadena_actual)
+        #         #resultado.append(True)
+        #         #print("Cadena: ", cadena_actual, "resultados: ", True)
+
+        #     # Se llama recursivamente a la función con las listas actualizadas.
+        #     return self.simular_res(diccionarios, iniciales, finales, resultado)
+-------------------------------------------------------------------------------------------------------------------
+           # Si la copia de la cadena tenía "", entonces analizar su lista de valores_cadena.
+            #if self.cadena_copy.count('"') == 2:
+            #print("Cadena: ", cadena_actual, "resultados: ", valores_cadena)
+
+            # if valores_cadena[5] == True:
+            #     pass
+            # else:
+            #     valores_cadena[6] = False
+
+            #     # Buscando el número de línea en donde se encuentra la cadena actual en el archivo.
+            #     with open(self.archivo, "r") as archivos:
+            #         for i, linea in enumerate(archivos):
+            #             if cadena_actual in linea:
+            #                 print("Sintax error: " + cadena_actual + " line: ", i+1)
+
+            # # Verificando si hay un true en la lista de valores cadena en la posición 7.
+            # if valores_cadena[6] == True:
+            #     pass
+            # else:
+                
+            #     valores_cadena[7] = False
+
+            #     # Buscando el número de línea en donde se encuentra la cadena actual en el archivo.
+            #     with open(self.archivo, "r") as archivos:
+            #         for i, linea in enumerate(archivos):
+            #             if cadena_actual in linea:
+            #                 print("Sintax error: " + cadena_actual + " line: ", i+1)
+
+-----------------------------------------------------------------------------------------------------
+            # if cadena_actual.count('"') == 2: # Detectando si la cadena actual es una cadena de texto.
+                
+            #     for caracter in cadena_actual:
+            #         if caracter.isalpha():
+            #             #print("Caracter")
+            #             # Quitar las comillas de la cadena.
+            #             cadena_actual = cadena_actual.replace('"', '')
+                
+            # else: 
+            #     # Si no es una cadena de texto, se verifica si es una palabra reservada.
+            #     if cadena_actual in self.reservadas:
+            #         # Si la cadena actual es una palabra reservada, se agrega a la lista de resultados.
+            #         print("Palabra reservada", cadena_actual)
+            #         resultado.append(True)
+                
+            #     # Si la cadena es diferente a un número, entonces no importa.
+            #     if cadena_actual.isdigit() == False:
+            #         pass
+
+            # # Detectando los operadores.
+            # if len(cadena_actual) == 1: # Detectando primero su longitud.
+            #     if cadena_actual in self.operadores_reservados: # Detectando si es un operador.
+            #         print("Operador detectado")
+
+            #print("Cadena actual: ", cadena_actual)
