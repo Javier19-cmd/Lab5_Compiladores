@@ -1,67 +1,91 @@
-def primero(gramatica):
+from Grammar import *
+
+def cerradura(grammar, items):
+    closure = set(items)
+    added = True
+    while added:
+        added = False
+        for item in list(closure):
+            i = grammar.producciones.index(item)
+            prod = grammar.producciones[i]
+            if '.' not in prod.derecha:
+                continue
+            dot_index = prod.derecha.index('.')
+            if dot_index == len(prod.derecha) - 1:
+                continue
+            B = prod.right[dot_index + 1]
+            if B in grammar.no_terminales:
+                for right in grammar.right_producciones[B]:
+                    new_item = Produccion(B, ['.'] + right)
+                    if new_item not in closure:
+                        closure.add(new_item)
+                        added = True
+    return closure
+
+def primero(grammar):
     primeros = {}
     # Inicializar los conjuntos primeros para cada símbolo
-    for simbolo in gramatica.no_terminales | gramatica.terminales:
-        primeros[simbolo] = set()
-        if simbolo in gramatica.terminales:
-            primeros[simbolo].add(simbolo)
+    for symbol in grammar.no_terminales | grammar.terminales:
+        primeros[symbol] = set()
+        if symbol in grammar.terminales:
+            primeros[symbol].add(symbol)
     # Iterar hasta que no haya cambios en los conjuntos primeros
     while True:
         cambios = False
-        for produccion in gramatica.producciones:
-            simbolos_der = produccion.derecha
+        for prod in grammar.producciones:
+            right_symbols = prod.derecha
             primeros_prod = set()
             i = 0
-            while i < len(simbolos_der) and '' in primeros[simbolos_der[i]]:
-                primeros_prod |= primeros[simbolos_der[i]] - {''}
+            while i < len(right_symbols) and '' in primeros[right_symbols[i]]:
+                primeros_prod |= primeros[right_symbols[i]] - {''}
                 i += 1
-            if i == len(simbolos_der):
+            if i == len(right_symbols):
                 primeros_prod.add('')
-            elif simbolos_der[i] in gramatica.terminales:
-                primeros_prod.add(simbolos_der[i])
+            elif right_symbols[i] in grammar.terminales:
+                primeros_prod.add(right_symbols[i])
             else:
-                primeros_prod |= primeros[simbolos_der[i]] - {''}
-            antes = len(primeros[produccion.izquierda])
-            primeros[produccion.izquierda] |= primeros_prod
-            if len(primeros[produccion.izquierda]) > antes:
+                primeros_prod |= primeros[right_symbols[i]] - {''}
+            before = len(primeros[prod.izquierda])
+            primeros[prod.izquierda] |= primeros_prod
+            if len(primeros[prod.izquierda]) > before:
                 cambios = True
         if not cambios:
             break
     return primeros
 
-
-def siguiente(gramatica, primeros):
+def siguiente(grammar, primeros):
     siguientes = {}
-    # Inicializar los conjuntos siguientes para cada símbolo no terminal
-    for no_terminal in gramatica.no_terminales:
-        siguientes[no_terminal] = set()
+    # Inicializar los conjuntos siguientes para cada símbolo
+    for symbol in grammar.no_terminales | grammar.terminales:
+        siguientes[symbol] = set()
     # Agregar el símbolo de fin de cadena al conjunto siguiente del símbolo no terminal inicial
-    siguientes[gramatica.inicial].add('$')
+    siguientes[grammar.inicial].add('$')
+    # Inicializar los conjuntos siguientes con los mismos símbolos que los conjuntos primeros
+    siguientes.update(primeros)
     # Iterar hasta que no haya cambios en los conjuntos siguientes
     while True:
         cambios = False
-        for produccion in gramatica.producciones:
-            simbolos_der = produccion.derecha
-            for i, simbolo_der in enumerate(simbolos_der):
-                if simbolo_der in gramatica.no_terminales:
-                    antes = len(siguientes[simbolo_der])
+        for prod in grammar.producciones:
+            right_symbols = prod.derecha
+            for i, symbol in enumerate(right_symbols):
+                if symbol in grammar.no_terminales:
+                    before = len(siguientes[symbol])
                     # El siguiente del símbolo no terminal de la derecha es el primer
                     # símbolo terminal que sigue en la producción o el conjunto siguiente
                     # del símbolo no terminal de la derecha si todos los símbolos siguientes
                     # derivan en la cadena vacía
-                    if i == len(simbolos_der) - 1:
-                        siguientes[simbolo_der] |= siguientes[produccion.izquierda]
+                    if i == len(right_symbols) - 1:
+                        closure = cerradura(grammar, [prod])
+                        siguientes[symbol] |= closure
                     else:
-                        siguientes_simbolo = primeros[simbolos_der[i+1]] | {''}
-                        siguientes[simbolo_der] |= siguientes_simbolo - {''}
-                        # Si todos los símbolos siguientes derivan en la cadena vacía,
-                        # se agrega el conjunto siguiente del símbolo de la izquierda
-                        if '' in primeros[simbolos_der[i+1]]:
-                            siguientes[simbolo_der] |= siguientes[produccion.izquierda]
-                    if len(siguientes[simbolo_der]) > antes:
+                        siguientes_symbol = primeros[right_symbols[i+1]] - {''}
+                        if '' in primeros[right_symbols[i+1]]:
+                            siguientes_symbol |= siguientes[right_symbols[i+1]]
+                        siguientes[symbol] |= siguientes_symbol
+                    if len(siguientes[symbol]) > before:
                         cambios = True
-                else:
-                    continue
+            if '' in primeros[right_symbols[-1]]:
+                siguientes[prod.izquierda] |= siguientes[symbol] - {''}
         if not cambios:
             break
     return siguientes

@@ -12,7 +12,13 @@ class Grammar:
                 if simbolo not in self.no_terminales:
                     self.terminales.add(simbolo)
 
+    def __str__(self):
+        return '\n'.join([str(p) for p in self.producciones])
+
 class Produccion:
     def __init__(self, izquierda, derecha):
         self.izquierda = izquierda
         self.derecha = derecha
+    
+    def __str__(self):
+        return f"{self.izquierda} -> {' '.join(self.derecha)}"
