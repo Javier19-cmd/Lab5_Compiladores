@@ -1,111 +1,72 @@
-# Definimos la función cerradura
-def cerradura(I, rules):
-    J = set(I)
-    while True:
-        added = False
-        for item in J:
-            if '.' in item[1]:
+def aumentar_gramatica(gramatica):
+    nuevo_simbolo_inicial = gramatica[0][0] + "'"
+    nueva_gramatica = [[nuevo_simbolo_inicial, gramatica[0][0]]]
+    
+    for produccion in gramatica:
+        nueva_gramatica.append(produccion)
+    
+    return nueva_gramatica
+
+
+def construir_gramatica_y_conjunto_I(lista_producciones):
+    simbolo_inicial = lista_producciones[0][0]
+    gramatica = [[produccion[0], produccion[1]] for produccion in lista_producciones]
+    I = {simbolo_inicial + "' -> ." + simbolo_inicial}
+    
+    for produccion in gramatica:
+        if produccion[0] == simbolo_inicial:
+            I.add(simbolo_inicial + "' -> " + simbolo_inicial + ".")
+        I.add(produccion[0] + " -> ." + produccion[1])
+    
+    return gramatica, list(I)
+
+
+def CERRADURA(I, gramatica):
+    J = set(tuple(prod) for prod in I)
+    agregados = True
+
+    while agregados:
+        agregados = False
+        nuevos = []
+
+        for produccion in J:
+            if produccion[1] == "":
                 continue
-            B = item[1][item[1].index('.')+1]
-            if B in rules:
-                for prod in rules[B]:
-                    newItem = (B, '.' + prod)
-                    if newItem not in J:
-                        J.add(newItem)
-                        added = True
-        if not added:
-            break
-    return J
 
-# Definimos la función irA
-def irA(I, X, rules):
-    J = set()
-    for item in I:
-        if '.' in item[1] and item[1][-1] == X:
-            newItem = (item[0], item[1][:-1] + X + '.')
-            J.add(newItem)
-    if X == '$' and not J:
-        lastItem = I.pop()
-        newItem = (lastItem[0], lastItem[1] + '$.')
-        J.add(newItem)
-    if X not in rules and X not in ['.', '$']:
-        rules[X] = []
-    return cerradura(J, rules)
+            siguiente_simbolo = produccion[1][0]
+            if siguiente_simbolo.isupper():
+                for nueva_produccion in gramatica:
+                    if nueva_produccion[0] == siguiente_simbolo and tuple(nueva_produccion) not in J and tuple(nueva_produccion) not in nuevos:
+                        nuevos.append(tuple(nueva_produccion))
+                        agregados = True
 
-def generar_automata(rules):
-    # Creamos el item inicial
-    I0 = {('S', '.')}
+        J.update(nuevos)
 
-    # Obtenemos la cerradura del item inicial
-    C = cerradura(I0, rules)
-
-    # Creamos un diccionario para guardar los conjuntos de items
-    conjuntos = {0: C}
-
-    # Creamos una lista para guardar las transiciones del autómata
-    transitions = []
-
-    # Recorremos los conjuntos de items existentes
-    for i, I in conjuntos.items():
-        # Creamos una copia de las reglas de producción
-        rules_copy = rules.copy()
-
-        # Para cada símbolo de la gramática
-        nuevos_conjuntos = []  # Creamos una nueva lista para almacenar los nuevos conjuntos de elementos
-        for X in rules_copy:
-            # Obtenemos el conjunto de items resultante al aplicar irA con el símbolo X
-            J = irA(I, X, rules_copy)
-
-            # Si el conjunto resultante no es vacío
-            if J and J not in conjuntos.values() and J not in nuevos_conjuntos:
-                # Obtenemos la cerradura del conjunto resultante
-                J = cerradura(J, rules_copy)
-                # Añadimos el conjunto resultante a los conjuntos de items
-                nuevos_conjuntos.append(J)
-
-                # Añadimos la transición del conjunto i al conjunto recién creado
-                transitions.append((i, X, len(conjuntos) + len(nuevos_conjuntos) - 1))
-
-            # Si el conjunto resultante ya existe en los conjuntos de items
-            elif J in conjuntos.values():
-                # Añadimos la transición del conjunto i al conjunto existente
-                transitions.append((i, X, list(conjuntos.keys())[list(conjuntos.values()).index(J)]))
-
-        # Añadimos los nuevos conjuntos de items al diccionario
-        for j, conjunto in enumerate(nuevos_conjuntos):
-            conjuntos[len(conjuntos) + j] = conjunto
-
-        # Creamos una copia de las claves del diccionario para evitar el error "dictionary changed size during iteration"
-        for rule in list(rules_copy.keys()):
-            for prod in rules_copy[rule]:
-                for symbol in prod:
-                    if symbol not in rules_copy and symbol not in ['.', '$']:
-                        rules_copy[symbol] = []
-
-    # Devolvemos el resultado.
-    return conjuntos, transitions
+    # Convertir las producciones de J en strings y devolver un conjunto de strings
+    return set([''.join(prod) for prod in J])
 
 
-# Definimos las reglas de producción
-rules = {
-    'S': ['E $'],
-    'E': ['T + E', 'T'],
-    'T': ['F * T', 'F'],
-    'F': ['( E )', 'id']
-}
+grammar = [
+    ["E", "E + T"],
+    ["E", "T"],
+    ["T", "T * F"],
+    ["T", "F"],
+    ["F", "( E )"],
+    ["F", "id"]
+]
 
-# Generamos el autómata a partir de las reglas de producción
-conjuntos, transitions = generar_automata(rules)
+gr = aumentar_gramatica(grammar)
 
-# Mostramos los conjuntos de items
-print("Conjuntos de items:")
-for i, conjunto in conjuntos.items():
-    print(f"I{i} = {{")
-    for item in conjunto:
-        print(f"    {item[0]} -> {item[1]}")
-    print("}")
+print(gr)
 
-# Mostramos las transiciones
-print("\nTransiciones:")
-for transition in transitions:
-    print(f"I{transition[0]} --{transition[1]}--> I{transition[2]}")
+gram, I = construir_gramatica_y_conjunto_I(gr)
+
+#print(I)
+
+J = CERRADURA(I, gram)
+
+print(J)
+
+# # Imprimirla hacia abajo.
+# for produccion in gr:
+#     print(produccion[0] + " -> " + produccion[1])
