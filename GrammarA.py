@@ -46,6 +46,17 @@ def CERRADURA(I, gramatica):
     return set([''.join(prod) for prod in J])
 
 
+def irA(I, X, gramatica): # Función para calcular el irA.
+    J = set()
+    for produccion in I:
+        if produccion[1] == "" or produccion[1][0] != X:
+            continue
+        nueva_produccion = (produccion[0], produccion[1][1:] + ".")
+        J.add(nueva_produccion)
+    return CERRADURA(J, gramatica)
+
+
+
 grammar = [
     ["E", "E + T"],
     ["E", "T"],
