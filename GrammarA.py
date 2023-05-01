@@ -7,18 +7,29 @@ def aumentar_gramatica(gramatica):
     
     return nueva_gramatica
 
+def simbolos_gramaticales(lista_producciones):
+    simbolos = set()
+    for produccion in lista_producciones:
+        simbolos.add(produccion[0])
+        for simbolo in produccion[1].split():
+            if simbolo.isupper():
+                simbolos.add(simbolo)
+            elif simbolo.islower() or simbolo.isnumeric() or simbolo in ['+', '*', '(', ')']:
+                simbolos.add(simbolo)
+    return sorted(list(simbolos))
 
 def construir_gramatica_y_conjunto_I(lista_producciones):
     simbolo_inicial = lista_producciones[0][0]
     gramatica = [[produccion[0], produccion[1]] for produccion in lista_producciones]
-    I = {simbolo_inicial + "' -> ." + simbolo_inicial}
+    I = {simbolo_inicial + " -> ." + simbolo_inicial}
     
     for produccion in gramatica:
-        if produccion[0] == simbolo_inicial:
-            I.add(simbolo_inicial + "' -> " + simbolo_inicial + ".")
-        I.add(produccion[0] + " -> ." + produccion[1])
+        if produccion[0] == simbolo_inicial and simbolo_inicial + " -> ." + simbolo_inicial not in I:
+            I.add(simbolo_inicial + " -> " + simbolo_inicial + ".")
+        if produccion[0] + " -> ." + produccion[1] not in I:
+            I.add(produccion[0] + " -> ." + produccion[1])
     
-    return gramatica, list(I)
+    return gramatica, I
 
 
 def CERRADURA(I, gramatica):
@@ -46,16 +57,82 @@ def CERRADURA(I, gramatica):
     return set([''.join(prod) for prod in J])
 
 
-def irA(I, X, gramatica): # Función para calcular el irA.
+def irA(I, X, gramatica):
+
+    # print("I: ", I)
+    # print("X: ", X)
+    # print("Gramática: ", gramatica)
+
     J = set()
     for produccion in I:
-        if produccion[1] == "" or produccion[1][0] != X:
+        if len(produccion[0]) == 0 or produccion[0][0] != X:
             continue
-        nueva_produccion = (produccion[0], produccion[1][1:] + ".")
-        J.add(nueva_produccion)
-    return CERRADURA(J, gramatica)
+        nueva_produccion = (produccion[0], produccion[0][1:] + ".")
 
+        #print("Nueva producción: ", nueva_produccion)
+        
+        J |= CERRADURA({nueva_produccion}, gramatica)
 
+        #print("J: ", J)
+
+    return J
+
+#print(I)
+
+# J = CERRADURA(I, gram)
+
+# print(J)
+
+#print("Gramática: ", gram)
+
+def elementos(G):
+    
+    gra, Is = construir_gramatica_y_conjunto_I(G)
+
+    # Obtener la producción que tenga el '.
+    #print("Gramática: ", gra, "Conjunto I: ",  Is)
+
+    # Quitar las producciones que sean de tipo "E' -> E'." y "E' -> .E'" del Is.
+    Is = {produccion for produccion in Is if produccion[0] != produccion[1]}
+
+    #print(Is)
+
+    C = CERRADURA(Is, gra)
+    
+    simbolos_gramaticaless = simbolos_gramaticales(G)
+
+    #print("Simbolos: ", simbolos_gramaticaless)
+    
+    #print("C: ", C)
+
+    done = False
+    while not done:
+        done = True
+        new_sets = set()  # create a new set to store the new items
+        for I in C:
+            for X in simbolos_gramaticaless:
+
+                # print("I: ", I)
+                # print("Símbolos: ", simbolos_gramaticaless)
+                # print("X: ", X)
+
+                ira = irA(I, X, G)
+                #print("IrA", ira)
+
+                if ira and ira not in C:
+
+                    #print("ira: ", ira)
+
+                    new_sets.add(frozenset(ira))  # add the new items to the new set
+
+                    #print("New set: ", new_sets)
+
+                    done = False
+        C.update(new_sets)  # add the new items to C
+
+        #print("C: ", C)
+
+    return C
 
 grammar = [
     ["E", "E + T"],
@@ -68,16 +145,12 @@ grammar = [
 
 gr = aumentar_gramatica(grammar)
 
-print(gr)
+#print(gr)
 
 gram, I = construir_gramatica_y_conjunto_I(gr)
 
-#print(I)
 
-J = CERRADURA(I, gram)
 
-print(J)
+C = elementos(gram)
 
-# # Imprimirla hacia abajo.
-# for produccion in gr:
-#     print(produccion[0] + " -> " + produccion[1])
+print(C)
