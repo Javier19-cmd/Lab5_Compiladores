@@ -1,3 +1,5 @@
+from prettytable import PrettyTable
+
 def aumentar_gramatica(gramatica):
     nuevo_simbolo_inicial = gramatica[0][0] + "'"
     nueva_gramatica = [[nuevo_simbolo_inicial, gramatica[0][0]]]
@@ -31,14 +33,13 @@ def construir_gramatica_y_conjunto_I(lista_producciones):
     
     return gramatica, I
 
-
-def CERRADURA(I, gramatica):
-    J = set(tuple(prod) for prod in I)
+def CERRADURA(I, gramatica): # Cálculo de la cerradura de un conjunto I dada una gramática.
+    J = set(I)
     agregados = True
 
     while agregados:
         agregados = False
-        nuevos = []
+        nuevos = set()
 
         for produccion in J:
             if produccion[1] == "":
@@ -47,34 +48,25 @@ def CERRADURA(I, gramatica):
             siguiente_simbolo = produccion[1][0]
             if siguiente_simbolo.isupper():
                 for nueva_produccion in gramatica:
-                    if nueva_produccion[0] == siguiente_simbolo and tuple(nueva_produccion) not in J and tuple(nueva_produccion) not in nuevos:
-                        nuevos.append(tuple(nueva_produccion))
+                    if nueva_produccion[0] == siguiente_simbolo and nueva_produccion not in J and nueva_produccion not in nuevos:
+                        nuevos.add(nueva_produccion)
                         agregados = True
 
         J.update(nuevos)
 
     # Convertir las producciones de J en strings y devolver un conjunto de strings
-    return set([''.join(prod) for prod in J])
-
+    return set(''.join(prod) for prod in J)
 
 def irA(I, X, gramatica):
-
-    # print("I: ", I)
-    # print("X: ", X)
-    # print("Gramática: ", gramatica)
-
+    """
+    Calcula el conjunto de ítems alcanzables desde el estado I al leer el símbolo X.
+    """
     J = set()
     for produccion in I:
-        if len(produccion[0]) == 0 or produccion[0][0] != X:
+        if len(produccion[0]) == 0 or produccion[0][0] == X:
             continue
-        nueva_produccion = (produccion[0], produccion[0][1:] + ".")
-
-        #print("Nueva producción: ", nueva_produccion)
-        
+        nueva_produccion = (produccion[0], produccion[0][1:] + ".") 
         J |= CERRADURA({nueva_produccion}, gramatica)
-
-        #print("J: ", J)
-
     return J
 
 #print(I)
@@ -134,14 +126,69 @@ def elementos(G):
 
     return C
 
-grammar = [
-    ["E", "E + T"],
-    ["E", "T"],
-    ["T", "T * F"],
-    ["T", "F"],
-    ["F", "( E )"],
-    ["F", "id"]
-]
+# def construir_automata_LR0(grammar):
+#     """
+#     Construye el autómata de análisis sintáctico LR(0) a partir de una gramática dada.
+
+#     Args:
+#         grammar (List[List[str]]): La gramática en forma de lista de producciones.
+
+#     Returns:
+#         Tuple[Dict[Tuple[int, str], Tuple[str, int]], Dict[int, Dict[str, Tuple[str, int]]]]: Una tupla con el diccionario de transiciones y el diccionario de acciones.
+#     """
+#     # Aumentar la gramática
+#     grammar = aumentar_gramatica(grammar)
+
+#     # Obtener los símbolos gramaticales
+#     simbolos_gram = simbolos_gramaticales(grammar)
+
+#     # Construir la gramática y el conjunto I0
+#     gramatica, I0 = construir_gramatica_y_conjunto_I(grammar)
+
+#     # Crear la lista de conjuntos LR(0) y el diccionario de transiciones
+#     C = [CERRADURA(I0, gramatica)]
+#     transiciones = {}
+
+#     # Crear el diccionario de acciones
+#     acciones = {}
+
+#     FIN_CADENA = "FIN"
+#     SHIFT = "SHIFT"
+#     ACEPTAR = "ACEPTAR"
+#     REDUCE = "REDUCE"
+
+#     # Recorrer la lista de conjuntos LR(0)
+#     for i, conjunto in enumerate(C):
+#         # Recorrer los símbolos gramaticales y el símbolo de fin de cadena
+#         for simbolo in simbolos_gram + [FIN_CADENA]:
+#             # Calcular el conjunto siguiente
+#             ir_a = irA(conjunto, simbolo, gramatica)
+
+#             # Si el conjunto siguiente es vacío, pasar al siguiente símbolo
+#             if not ir_a:
+#                 continue
+
+#             # Si el conjunto siguiente no está en la lista de conjuntos, agregarlo
+#             if ir_a not in C:
+#                 C.append(ir_a)
+
+#             # Agregar la transición correspondiente
+#             j = C.index(ir_a)
+#             transiciones[(i, simbolo)] = (SHIFT, j)
+
+#         # Recorrer las producciones en el conjunto actual
+#         for produccion in conjunto:
+#             # Si la producción está completa, agregar la acción correspondiente
+#             if produccion[-1] == ".":
+#                 # Si es la producción S' -> S., agregar la acción de aceptar
+#                 if produccion == f"{gramatica[0][0]}' -> {gramatica[0][0]}.":
+#                     acciones[(i, FIN_CADENA)] = (ACEPTAR,)
+#                 # Si no, agregar la acción de reducir
+#                 else:
+#                     for simbolo in simbolos_gram + [FIN_CADENA]:
+#                         acciones[(i, simbolo)] = (REDUCE, produccion)
+
+#     return transiciones, acciones
 
 def construir_automata_LR0(grammar):
     """
@@ -151,33 +198,27 @@ def construir_automata_LR0(grammar):
         grammar (List[List[str]]): La gramática en forma de lista de producciones.
 
     Returns:
-        Tuple[Dict[Tuple[int, str], Tuple[str, int]], Dict[int, Dict[str, Tuple[str, int]]]]: Una tupla con el diccionario de transiciones y el diccionario de acciones.
+        Tuple[List[Set[Tuple[str, int]]], Dict[Tuple[int, str], Tuple[int, str, int, Set[str]]], Dict[Tuple[int, str], Tuple[str, int]]]: 
+        Una tupla con la lista de conjuntos, el diccionario de transiciones y el diccionario de acciones.
     """
     # Aumentar la gramática
-    grammar = aumentar_gramatica(grammar)
+    grammara = aumentar_gramatica(grammar)
 
     # Obtener los símbolos gramaticales
-    simbolos_gram = simbolos_gramaticales(grammar)
+    simbolos_gram = simbolos_gramaticales(grammara)
 
     # Construir la gramática y el conjunto I0
-    gramatica, I0 = construir_gramatica_y_conjunto_I(grammar)
+    gramatica, I0 = construir_gramatica_y_conjunto_I(grammara)
 
-    # Crear la lista de conjuntos LR(0) y el diccionario de transiciones
+    # Crear la lista de conjuntos LR(0), el diccionario de transiciones y el diccionario de acciones
     C = [CERRADURA(I0, gramatica)]
     transiciones = {}
-
-    # Crear el diccionario de acciones
     acciones = {}
-
-    FIN_CADENA = "FIN"
-    SHIFT = "SHIFT"
-    ACEPTAR = "ACEPTAR"
-    REDUCE = "REDUCE"
 
     # Recorrer la lista de conjuntos LR(0)
     for i, conjunto in enumerate(C):
         # Recorrer los símbolos gramaticales y el símbolo de fin de cadena
-        for simbolo in simbolos_gram + [FIN_CADENA]:
+        for simbolo in simbolos_gram + ["FIN"]:
             # Calcular el conjunto siguiente
             ir_a = irA(conjunto, simbolo, gramatica)
 
@@ -191,23 +232,50 @@ def construir_automata_LR0(grammar):
 
             # Agregar la transición correspondiente
             j = C.index(ir_a)
-            transiciones[(i, simbolo)] = (SHIFT, j)
+            transiciones[(i, simbolo)] = (j, simbolo, i, conjunto)
 
         # Recorrer las producciones en el conjunto actual
         for produccion in conjunto:
             # Si la producción está completa, agregar la acción correspondiente
             if produccion[-1] == ".":
                 # Si es la producción S' -> S., agregar la acción de aceptar
-                if produccion == f"{gramatica[0][0]}' -> {gramatica[0][0]}.":
-                    acciones[(i, FIN_CADENA)] = (ACEPTAR,)
+                if produccion == f"{gramatica[0][0]}' -> {gramatica[0][0]}.":  # se corrige el punto final de la produccion
+                    acciones[(i, "FIN")] = ("ACEPTAR", i, conjunto)
                 # Si no, agregar la acción de reducir
                 else:
-                    for simbolo in simbolos_gram + [FIN_CADENA]:
-                        acciones[(i, simbolo)] = (REDUCE, produccion)
+                    for simbolo in simbolos_gram + ["FIN"]:
+                        acciones[(i, simbolo)] = ("REDUCE", produccion, i, conjunto)
 
-    return transiciones, acciones
+    return C, transiciones, acciones
 
 
-transiciones, acciones = construir_automata_LR0(grammar)
-print("Transiciones: ", transiciones)
-print("Acciones: ", acciones)
+grammar = [
+    ["E", "E + T"],
+    ["E", "T"],
+    ["T", "T * F"],
+    ["T", "F"],
+    ["F", "( E )"],
+    ["F", "id"]
+] # Gramática a utilizar.
+
+C, transiciones, acciones = construir_automata_LR0(grammar)
+#print("Transiciones: ", transiciones)
+#print("Acciones: ", acciones)
+#print("C: ", C)
+
+
+# Colocar las transiciones en una tabla.
+# Definir las columnas de la tabla
+table = PrettyTable()
+table.field_names = [" Símbolo ", " Conjunto de partida ", "Conjunto de llegada ", " Producción del conjunto "]
+
+for estado, simbolo in transiciones:
+    accion_transicion = transiciones[(estado, simbolo)]
+    table.add_row([simbolo, accion_transicion[0], accion_transicion[2], accion_transicion[3]])
+
+# for estado, simbolo in acciones:
+#     accion_transicion = acciones[(estado, simbolo)]
+#     table.add_row([simbolo, accion_transicion[0], accion_transicion[2], accion_transicion[3]])
+
+# Imprimir la tabla
+print(table)
