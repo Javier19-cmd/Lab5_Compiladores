@@ -2,7 +2,7 @@ from prettytable import PrettyTable
 
 tabla = []
 
-def aumentar_gramatica(gramatica):
+def aumentar_gramatica(gramatica): # Aumento de la gramática.
     nuevo_simbolo_inicial = gramatica[0][0] + "'"
     nueva_gramatica = [[nuevo_simbolo_inicial, gramatica[0][0]]]
     
@@ -11,7 +11,7 @@ def aumentar_gramatica(gramatica):
     
     return nueva_gramatica
 
-def simbolos_gramaticales(lista_producciones):
+def simbolos_gramaticales(lista_producciones): # Obteniendo los símbolos gramaticales.
     simbolos = set()
     for produccion in lista_producciones:
         simbolos.add(produccion[0])
@@ -22,7 +22,7 @@ def simbolos_gramaticales(lista_producciones):
                 simbolos.add(simbolo)
     return sorted(list(simbolos))
 
-def construir_gramatica_y_conjunto_I(lista_producciones):
+def construir_gramatica_y_conjunto_I(lista_producciones): # Construyendo la gramática y el conjunto inicial.
 
     """
     
@@ -92,9 +92,10 @@ def CERRADURA(I, gramatica): # Cálculo de la cerradura de un conjunto I dada un
     return cerradura
 
 
-def ir_A(I, X, gramatica):
+def ir_A(I, X, gramatica): # Función para generar transiciones.
 
     #print("I: ", I)
+    #print(X)
 
     J = []
     for elemento in I:
@@ -205,7 +206,7 @@ def ir_A(I, X, gramatica):
     return CERRADURA(J, gramatica)
 
 
-def construir_automata_LR0(grammar):
+def construir_automata_LR0(grammar): # Construcción de la gramática.
     """
     Construye el autómata de análisis sintáctico LR(0) a partir de una gramática dada.
 
@@ -297,21 +298,22 @@ for elemento in tabla:
     if elemento not in lista_nueva:
         lista_nueva.append(elemento)
 
-for i in lista_nueva:
-    print(i)
+# for i in lista_nueva:
+#     print(i)
 
-# Colocar las transiciones en una tabla.
-# Definir las columnas de la tabla
-table = PrettyTable()
-table.field_names = [" Símbolo ", " Conjunto de partida ", "Conjunto de llegada "]
 
-# # Agregando los resultados de la tabla a la table.
-# for i in tabla:
-#     table.add_row([tabla[1], tabla[0], tabla[2]])
+# # Colocar las transiciones en una tabla.
+# # Definir las columnas de la tabla
+# table = PrettyTable()
+# table.field_names = [" Símbolo ", " Conjunto de partida ", "Conjunto de llegada "]
 
-# for estado, simbolo in acciones:
-#     accion_transicion = acciones[(estado, simbolo)]
-#     table.add_row([simbolo, accion_transicion[0], accion_transicion[2], accion_transicion[3]])
+# # # Agregando los resultados de la tabla a la table.
+# # for i in tabla:
+# #     table.add_row([tabla[1], tabla[0], tabla[2]])
 
-# Imprimir la tabla
-print(table)
+# # for estado, simbolo in acciones:
+# #     accion_transicion = acciones[(estado, simbolo)]
+# #     table.add_row([simbolo, accion_transicion[0], accion_transicion[2], accion_transicion[3]])
+
+# # Imprimir la tabla
+# print(table)
