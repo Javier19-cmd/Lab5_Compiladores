@@ -130,7 +130,7 @@ def ir_A(I, X, gramatica):
                 # Detectando el caracter después del punto.
                 caracter_despues_punto = nuevo_elemento[1][punto_pos+2]
 
-                print(caracter_despues_punto)
+                #print(caracter_despues_punto)
 
                 # Mantener el espacio antes del caracter.
                 if caracter_despues_punto == ' ':
@@ -151,7 +151,7 @@ def ir_A(I, X, gramatica):
 
                     #print("A: ", a, caracter_despues_punto)
 
-                    if [I, caracter_despues_punto, a] not in tabla:
+                    if [nuevo_elemento, caracter_despues_punto, a] not in tabla:
 
                         #print(I)
 
@@ -160,11 +160,47 @@ def ir_A(I, X, gramatica):
 
                     #print(tabla)
 
-
                     #return CERRADURA(J, gramatica)
 
 
                     #J += ir_A([nuevo_elemento], X, gramatica)
+
+                    # Obtener nuevamente la posición del punto.
+                    punto_pos = nuevo_elemento[1].index('.')
+
+                    #print("Punto pos: ", punto_pos)
+
+                    # Haciendo verificaciones otra vez.
+                    if punto_pos < len(nuevo_elemento[1])-1:
+
+                        # Detectando el caracter después del punto.
+                        caracter_despues_punto = nuevo_elemento[1][punto_pos+2]
+
+                        #print("Caracter: ", caracter_despues_punto)
+
+                        # Si no hay nada, entonces se hace break.
+                        if caracter_despues_punto == ' ':
+                            break
+
+                        # Colocando el punto después de ese caracter.
+                        nuevo_elemento = (nuevo_elemento[0], nuevo_elemento[1][:punto_pos] + caracter_despues_punto + '.' + nuevo_elemento[1][punto_pos+3:])
+
+                        #print("Nuevo elemento: ", nuevo_elemento)
+
+                        if nuevo_elemento not in J: 
+                            J.append(nuevo_elemento)
+
+                            a = CERRADURA(J, gramatica)
+
+                            #if [nuevo_elemento, caracter_despues_punto, a] not in tabla:
+
+                            tabla.append([nuevo_elemento, caracter_despues_punto, a])
+
+                            #print("A: ", a, " caracter después del punto: ", caracter_despues_punto)
+
+                            #print(tabla)
+
+                            #return CERRADURA(J, gramatica)
 
     return CERRADURA(J, gramatica)
 
@@ -236,8 +272,8 @@ def construir_automata_LR0(grammar):
     #     print(i)
 
     # Imprimiendo hacia abajo la tabla.
-    for i in tabla:
-        print(i)
+    # for i in tabla:
+    #     print(i)
 
     return C, transiciones, acciones
 
@@ -256,6 +292,13 @@ C, transiciones, acciones = construir_automata_LR0(grammar)
 #print("Acciones: ", acciones)
 #print("C: ", C)
 
+lista_nueva = []
+for elemento in tabla:
+    if elemento not in lista_nueva:
+        lista_nueva.append(elemento)
+
+for i in lista_nueva:
+    print(i)
 
 # Colocar las transiciones en una tabla.
 # Definir las columnas de la tabla
