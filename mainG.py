@@ -30,11 +30,11 @@ with open(yapar) as y:
 
     tokens = re.findall(r'(?<=\n)%token\s+[^%\s][^\n]*', yalp)
 
-    toke = re.findall(r'(?<=\n)%token\s+[^%\s][^\n]*', yalp)
+    toke = re.findall(r'(?<=\n)%token\s+[^%\n]+', yalp)
 
     #print("Toke: ", toke)
 
-    #print(tokens)
+    print(" Tokens a tomar en cuenta: ", tokens)
 
     for token in tokens:
 
@@ -59,15 +59,18 @@ with open(yapar) as y:
     # Recorrer cada definición de token
     for token in toke:
         token_parts = token.split()
-        token_name = token_parts[1]
         tok = token_parts[0]
-
         # Verificar si la definición es válida
         if not tok.startswith("%") or (tok not in valid_tokens and len(token_parts) < 3):
-            print(f"La definición de {token_name} es inválida.")
+            print(f"La definición de {' '.join(token_parts[1:])} es inválida.")
         else:
-            print(f"La definición de {token_name} es válida.")
+            for token_name in token_parts[1:]:
+                print(f"La definición de {token_name} es válida.")
+                lista_tkyp.append(token_name)
     
+    # Quitando repeticiones de la lista lista_tkyp.
+    lista_tkyp = list(dict.fromkeys(lista_tkyp))
+
     ti = re.findall(r'(?<=\n)token\s+[^\s][^\n]*', yalp)
 
     #print("Ti: ", ti)
@@ -137,3 +140,36 @@ with open(yapar) as y:
             print("Error: El token " + token + " no está definido en el yalex.")
         else: 
             print("El token " + token + " está definido en el yalex.")
+    
+    # Buscando en el archivo yapar la palabra IGNORE para quitar las 
+    # variables que estén definidas con dicha palabra.
+    with open(yapar) as y:
+
+        # Leyendo el archivo yapar.
+        yapar = y.read()
+
+
+        # Buscando la línea que contiene la palabra IGNORE.
+        for line in yapar.split('\n'):
+            if "IGNORE" in line:
+                print("La palabra IGNORE está en la línea:", line)
+
+                # Extrayendo la cadena de texto que contiene las variables con la palabra IGNORE.
+                cadena_ignore = line[line.find("IGNORE")+6:].strip()
+
+                print("Cadena: ", cadena_ignore)
+
+                # Separando los tokens a ignorar en una lista.
+                tokens_a_ignorar = [tok.strip() for tok in cadena_ignore.split(' ')]
+                
+                # Saliendo del ciclo para no procesar el resto del archivo.
+                break
+                
+        print("Tokens a ignorar: ", tokens_a_ignorar)
+
+        # Quitando esos tokens de la lista lista_tkyp.
+        for token in tokens_a_ignorar:
+            if token in lista_tkyp:
+                lista_tkyp.remove(token)
+        
+        print("Lista de tokens sin los tokens a ignorar: ", lista_tkyp)
