@@ -2,6 +2,7 @@ from Grammar import *
 from GramarF import primero, siguiente
 from GrammarA import *
 import re
+from io import StringIO
 
 yapar = "slr-2.yalp" # Variable que guarda el nombre del yapar.
 yalex = "slr-2.yal" # Variable que guarda el nombre del yalex.
@@ -125,7 +126,7 @@ with open(yapar) as y:
                 lista_tk.append(token_value.strip())
 
                 #print("Token value: ", token_value.strip())
-    
+
 
     #print("Tokens: ", lista_tk)
 
@@ -143,21 +144,21 @@ with open(yapar) as y:
     
     # Buscando en el archivo yapar la palabra IGNORE para quitar las 
     # variables que estén definidas con dicha palabra.
-    with open(yapar) as y:
+    with open(yapar) as ya:
 
         # Leyendo el archivo yapar.
-        yapar = y.read()
+        yaparr = ya.read()
 
 
         # Buscando la línea que contiene la palabra IGNORE.
-        for line in yapar.split('\n'):
+        for line in yaparr.split('\n'):
             if "IGNORE" in line:
                 print("La palabra IGNORE está en la línea:", line)
 
                 # Extrayendo la cadena de texto que contiene las variables con la palabra IGNORE.
                 cadena_ignore = line[line.find("IGNORE")+6:].strip()
 
-                print("Cadena: ", cadena_ignore)
+                #print("Cadena: ", cadena_ignore)
 
                 # Separando los tokens a ignorar en una lista.
                 tokens_a_ignorar = [tok.strip() for tok in cadena_ignore.split(' ')]
@@ -172,4 +173,83 @@ with open(yapar) as y:
             if token in lista_tkyp:
                 lista_tkyp.remove(token)
         
-        print("Lista de tokens sin los tokens a ignorar: ", lista_tkyp)
+        print("Tokens a operar en la gramática: ", lista_tkyp)
+
+        # Constuir la gramática a partir del archivo.
+
+        # Viendo todo lo que está después del %% en el archivo.
+        #print("Todo lo que está después del %%: ", yapar[yapar.find("%%")+2:])
+
+        #print("Producciones: ", producciones)
+
+        # # Cerrando el archivo.
+        # y.close()
+        # ya.close()
+
+        #print(yaparr)
+
+        # Imprimiendo todo lo que está después del %%.
+        #print("Todo lo que está después del %%: ", yaparr[yaparr.find("%%")+2:])
+
+        despues = yaparr[yaparr.find("%%")+2:]
+
+        #print("Después: ", despues)
+
+        producciones = {}
+        conjunto = None
+        producciones_list = []
+
+        with StringIO(despues) as ss: 
+            for line in ss:
+                #print("Line: ", line)
+
+                if not line or line.startswith("%%"):
+                    continue
+                elif ":" in line: 
+                    if conjunto is not None:
+                        producciones[conjunto] = producciones_list
+
+                    conjunto, producciones_list = line.split(":", 1)
+                    conjunto = conjunto.strip()
+                    producciones_list = [p.strip() for p in producciones_list.split("|")]
+
+                else: 
+                    producciones_list.extend([p.strip() for p in line.split("|")])
+
+        if conjunto is not None:
+            producciones[conjunto] = producciones_list
+
+        #print(producciones)
+
+        # Quitando de los valores los "" y los ; sobrantes.
+        for key, value in producciones.items():
+            for i in range(len(value)):
+                value[i] = value[i].replace("\"", "").replace(";", "").strip()
+        
+        #print(producciones)
+
+        # Eliminar los "" de las listas de los valores.
+        for key, value in producciones.items():
+            new_value = []
+            for item in value:
+                if item != "":
+                    new_value.append(item)
+            producciones[key] = new_value
+
+        #print(producciones)
+    
+        grammar = []
+
+        for key, value in producciones.items():
+            for item in value:
+                grammar.append([key, item])
+        
+        #print(grammar)
+
+        # # Imprimiendo hacia abajo la gramática.
+        for i in grammar:
+            print(i)
+
+        tabla = construir_automata_LR0(grammar)
+
+        print(tabla)
