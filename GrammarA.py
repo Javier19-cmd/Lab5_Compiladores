@@ -18,7 +18,7 @@ def simbolos_gramaticales(lista_producciones): # Obteniendo los símbolos gramat
         for simbolo in produccion[1].split():
             if simbolo.isupper():
                 simbolos.add(simbolo)
-            elif simbolo.islower() or simbolo.isnumeric() or simbolo in ['+', '*', '(', ')']:
+            elif simbolo.islower() or simbolo.isnumeric() or simbolo in ['+', '*', '(', ')', '-', '/']:
                 simbolos.add(simbolo)
     return sorted(list(simbolos))
 
@@ -94,8 +94,8 @@ def CERRADURA(I, gramatica): # Cálculo de la cerradura de un conjunto I dada un
 
 def ir_A(I, X, gramatica): # Función para generar transiciones.
 
-    #print("I: ", I)
-    #print(X)
+    # print("I: ", I)
+    # print(X)
 
     J = []
     for elemento in I:
@@ -239,7 +239,7 @@ def construir_automata_LR0(grammar): # Construcción de la gramática.
     transiciones = {}
     acciones = {}
 
-    #print(C)
+    #print("C: ", C)
     #print(grammara)
 
     agregado = True
@@ -254,6 +254,8 @@ def construir_automata_LR0(grammar): # Construcción de la gramática.
                 #print(X)
 
                 goTo = ir_A(I, X, gramatica)
+
+                #print("GoTo: ", goTo)
 
 
                 # if goTo: 
@@ -276,27 +278,32 @@ def construir_automata_LR0(grammar): # Construcción de la gramática.
     # for i in tabla:
     #     print(i)
 
-    return C, transiciones, acciones
+    lista_nueva = []
+    for elemento in tabla:
+        if elemento not in lista_nueva:
+            lista_nueva.append(elemento)
+
+    #print("Tabla en GrammarA: ", tabla)
+    
+
+    #return C, transiciones, acciones
+
+    return tabla
 
 
-grammar = [
-    ["E", "E + T"],
-    ["E", "T"],
-    ["T", "T * F"],
-    ["T", "F"],
-    ["F", "( E )"],
-    ["F", "id"]
-] # Gramática a utilizar.
+# grammar = [
+#     ["E", "E + T"],
+#     ["E", "T"],
+#     ["T", "T * F"],
+#     ["T", "F"],
+#     ["F", "( E )"],
+#     ["F", "id"]
+# ] # Gramática a utilizar.
 
-C, transiciones, acciones = construir_automata_LR0(grammar)
+# C, transiciones, acciones = construir_automata_LR0(grammar)
 #print("Transiciones: ", transiciones)
 #print("Acciones: ", acciones)
 #print("C: ", C)
-
-lista_nueva = []
-for elemento in tabla:
-    if elemento not in lista_nueva:
-        lista_nueva.append(elemento)
 
 # for i in lista_nueva:
 #     print(i)

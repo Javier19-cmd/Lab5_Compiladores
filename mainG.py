@@ -250,6 +250,61 @@ with open(yapar) as y:
         for i in grammar:
             print(i)
 
-        tabla = construir_automata_LR0(grammar)
+        # Diccionario para hacer las sustituciones
+        replacements = {
+            'expression': 'E',
+            'term': 'T',
+            'factor': 'F',
+            'PLUS': '+',
+            'MINUS': '-',
+            'TIMES': '*',
+            'DIV': '/',
+            'LPAREN': '(',
+            'RPAREN': ')',
+            'ID': 'id',
+            'NUMBER': 'N',
+        }
 
-        print(tabla)
+        # Haciendo un parseo.
+        converted_grammar = []
+
+        for production in grammar:
+            converted_production = []
+            for symbol in production:
+                if symbol in replacements:
+                    converted_production.append(replacements[symbol])
+                else:
+                    # Si el símbolo es una cadena de caracteres con varias palabras
+                    # se recorre y se buscan las sustituciones
+                    words = symbol.split()
+                    converted_words = []
+                    for word in words:
+                        if word in replacements:
+                            converted_words.append(replacements[word])
+                        else:
+                            converted_words.append(word)
+                    converted_production.append(' '.join(converted_words))
+            converted_grammar.append(converted_production)
+
+        #print(converted_grammar)
+
+        tabla = construir_automata_LR0(converted_grammar)
+
+        #print(tabla)
+
+        # Imprimiendo hacia abajo la tabla.
+        for i in tabla:
+            print(i)
+        
+        # grammar2 = [
+        #     ["E", "E + T"],
+        #     ["E", "T"],
+        #     ["T", "T * F"],
+        #     ["T", "F"],
+        #     ["F", "( E )"],
+        #     ["F", "id"]
+        # ] # Gramática a utilizar.
+
+        # tabla2 = construir_automata_LR0(grammar2)
+
+        # print(tabla2)
