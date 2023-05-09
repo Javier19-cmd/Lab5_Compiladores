@@ -3,12 +3,15 @@ from GramarF import primero, siguiente
 from GrammarA import *
 import re
 from io import StringIO
+import pydot
 
-yapar = "slr-2.yalp" # Variable que guarda el nombre del yapar.
-yalex = "slr-2.yal" # Variable que guarda el nombre del yalex.
+yapar = "slr-1.yalp" # Variable que guarda el nombre del yapar.
+yalex = "slr-1.yal" # Variable que guarda el nombre del yalex.
 
 lista_tk = [] # Tokens del yalex.
 lista_tkyp = [] # Tokens del yapar.
+
+tabla_general = []
 
 # Abriendo el archivo yalp.
 with open(yapar) as y: 
@@ -247,8 +250,10 @@ with open(yapar) as y:
         #print(grammar)
 
         # # Imprimiendo hacia abajo la gramática.
-        for i in grammar:
-            print(i)
+        # for i in grammar:
+        #     print(i)
+
+        #print("Grammar: ", grammar)
 
         # Diccionario para hacer las sustituciones
         replacements = {
@@ -290,12 +295,93 @@ with open(yapar) as y:
 
         tabla = construir_automata_LR0(converted_grammar)
 
-        #print(tabla)
+        # for sublist in tabla: 
+        #     for item in sublist: 
+        #         for i in item: 
+        #             print(i)
+            #print()
+
+        # # Pasar la tabla a un diccionario.
+        # tabla_dic = {}
+
+        # for i in range(len(tabla)):
+        #     tabla_dic[i] = tabla[i]
+
+        # print(tabla_dic)
 
         # Imprimiendo hacia abajo la tabla.
         for i in tabla:
-            print(i)
+            tabla_general.append(i)
+
         
+    graph = pydot.Dot(graph_type='digraph')
+
+    # Creando los nodos.
+    nodes = set()
+    for lista in tabla_general:
+           #print(tupla[0])
+
+        # Convertir cada lista en la posición 0 de la lista a tupla si en caso no lo es.
+        if type(lista[0]) == tuple:
+            pass
+        elif type(lista[0]) == list:
+            tupla_general0 = tuple(tuple(lista) for lista in lista[0])
+
+            #print(tupla_general0)
+            nodes.add(tupla_general0)
+        
+        # Convertir cada lista en la posición 2 de la lista a tupla si en caso no lo es.
+        if type(lista[2]) == tuple:
+            pass
+        elif type(lista[2]) == list:
+            tupla_general2 = tuple(tuple(lista) for lista in lista[2])
+
+            #print(tupla_general2)
+            nodes.add(tupla_general2)
+    
+    # Agregando los nodos a la estructura de datos.
+    for node in nodes:
+        graph.add_node(pydot.Node(str(node)))
+
+    # Haciendo las conexiones.
+    for lista in tabla_general:
+
+        # Convertir cada lista en la posición 0 de la lista a tupla si en caso no lo es.
+        if type(lista[0]) == tuple:
+            pass
+        elif type(lista[0]) == list:
+            tupla_general0 = tuple(tuple(lista) for lista in lista[0])
+
+            #print(tupla_general0)
+            nodes.add(tupla_general0)
+        
+        # Convertir cada lista en la posición 2 de la lista a tupla si en caso no lo es.
+        if type(lista[2]) == tuple:
+            pass
+        elif type(lista[2]) == list:
+            tupla_general2 = tuple(tuple(lista) for lista in lista[2])
+
+            #print(tupla_general2)
+            nodes.add(tupla_general2)
+        
+        print(tupla_general0)
+
+        print(tupla_general2)
+
+        print(lista[1])
+
+        graph.add_edge(pydot.Edge(str(tupla_general0), str(tupla_general2), label=str(lista[1])))
+    
+    # Dibujando el grafo.
+    graph.write_png('Gramática.png')
+
+        #print(tupla)
+        
+        #nodes.add(tupla_convertida)
+
+
+        #print(tabla)
+
         # grammar2 = [
         #     ["E", "E + T"],
         #     ["E", "T"],
