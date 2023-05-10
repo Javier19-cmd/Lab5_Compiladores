@@ -5,8 +5,8 @@ import re
 from io import StringIO
 import pydot
 
-yapar = "slr-1.yalp" # Variable que guarda el nombre del yapar.
-yalex = "slr-1.yal" # Variable que guarda el nombre del yalex.
+yapar = "slr-2.yalp" # Variable que guarda el nombre del yapar.
+yalex = "slr-2.yal" # Variable que guarda el nombre del yalex.
 
 lista_tk = [] # Tokens del yalex.
 lista_tkyp = [] # Tokens del yapar.
@@ -312,17 +312,26 @@ with open(yapar) as y:
         # Imprimiendo hacia abajo la tabla.
         for i in tabla:
             tabla_general.append(i)
-
+            #print(i)
         
+        #print(tabla_general)
+
+    
+    for s in tabla_general:
+        print(s)
+
     graph = pydot.Dot(graph_type='digraph')
 
     # Creando los nodos.
     nodes = set()
     for lista in tabla_general:
+        #print(lista)
+
            #print(tupla[0])
 
         # Convertir cada lista en la posición 0 de la lista a tupla si en caso no lo es.
         if type(lista[0]) == tuple:
+            #nodes.add(lista[0])
             pass
         elif type(lista[0]) == list:
             tupla_general0 = tuple(tuple(lista) for lista in lista[0])
@@ -341,36 +350,68 @@ with open(yapar) as y:
     
     # Agregando los nodos a la estructura de datos.
     for node in nodes:
+
+        #print("Nodo: ", node)
+
         graph.add_node(pydot.Node(str(node)))
 
     # Haciendo las conexiones.
     for lista in tabla_general:
-
-        # Convertir cada lista en la posición 0 de la lista a tupla si en caso no lo es.
-        if type(lista[0]) == tuple:
-            pass
-        elif type(lista[0]) == list:
-            tupla_general0 = tuple(tuple(lista) for lista in lista[0])
-
-            #print(tupla_general0)
-            nodes.add(tupla_general0)
         
-        # Convertir cada lista en la posición 2 de la lista a tupla si en caso no lo es.
+        tupla0 = lista[0]
+        tupla2 = lista[2]
+        etiqueta = lista[1]
+
+        # print("Tupla0: ", tupla0)
+        # print("Tupla2: ", tupla2)
+        # print("Etiqueta: ", etiqueta)
+        
+
+        # Conversión de la lista[0] en caso de que sea necesario.
+        if type(lista[0]) == tuple:
+            tupla0 = lista[0]
+        elif type(lista[0]) == list:
+            tupla0 = tuple(tuple(lista) for lista in lista[0])
+
+        # Conversión de la lista[2] en caso de que sea necesario.
         if type(lista[2]) == tuple:
-            pass
+            tupla2 = lista[2]
         elif type(lista[2]) == list:
-            tupla_general2 = tuple(tuple(lista) for lista in lista[2])
+            tupla2 = tuple(tuple(lista) for lista in lista[2])
+        
+        graph.add_edge(pydot.Edge(str(tupla0), str(tupla2), label=str(etiqueta)))
+
+        # Poniendo el grafo de manera vertical.
+        graph.set_rankdir("LR")
+        
+
+
+        # # Convertir cada lista en la posición 0 de la lista a tupla si en caso no lo es.
+        # if type(lista[0]) == tuple:
+        #     #nodes.add(lista[0])
+        #     pass
+        # elif type(lista[0]) == list:
+        #     tupla_general0 = tuple(tuple(lista) for lista in lista[0])
+
+        #     #print(tupla_general0)
+        #     #nodes.add(tupla_general0)
+        
+        # # Convertir cada lista en la posición 2 de la lista a tupla si en caso no lo es.
+        # if type(lista[2]) == tuple:
+        #     print("Tupla: ", lista[2])
+        # elif type(lista[2]) == list:
+        #     tupla_general2 = tuple(tuple(lista) for lista in lista[2])
 
             #print(tupla_general2)
-            nodes.add(tupla_general2)
+            #nodes.add(tupla_general2)
         
-        print(tupla_general0)
+        #print(tupla_general0, lista[1], tupla_general2)
 
-        print(tupla_general2)
+        # print(tupla_general2)
 
-        print(lista[1])
+        # print(lista[1])
 
-        graph.add_edge(pydot.Edge(str(tupla_general0), str(tupla_general2), label=str(lista[1])))
+        # graph.add_edge(pydot.Edge(str(tupla_general0), str(tupla_general2), label=str(lista[1])))
     
     # Dibujando el grafo.
     graph.write_png('Gramática.png')
