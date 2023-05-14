@@ -2,13 +2,14 @@ from prettytable import PrettyTable
 from Grammar import *
 from EstadosLR import *
 import copy
+import pydot
 
 tabla = []
 
 
 def aumentar_gramatica(gramatica): # Aumento de la gramática.
-    nuevo_simbolo_inicial = grammar.productions[0][0] + "'"
-    nueva_gramatica = [[nuevo_simbolo_inicial, grammar.productions[0][0]]]
+    nuevo_simbolo_inicial = gramatica.productions[0][0] + "'"
+    nueva_gramatica = [[nuevo_simbolo_inicial, gramatica.productions[0][0]]]
 
     for produccion in gramatica.productions:
         nueva_gramatica.append(produccion)
@@ -56,6 +57,8 @@ def CERRADURA(I, grammar):
     #     print("Elementos en I: ", elemet)
     # print("")
 
+    #print("Elementos en CERRADURA: ", J)
+
     # for eleme in J:
     #     print("Elementos in cerradura: ", eleme)
 
@@ -69,6 +72,9 @@ def CERRADURA(I, grammar):
         for item in J:
             simbolo = item[0] # Símbolo
             prod = item[1] # Producción
+
+            # print("Símbolo: ", simbolo)
+            # print("Producción: ", prod)
 
             # Si el símbolo es E' y la producción es E, entonces es un corazón.
             if simbolo == "E'":
@@ -98,10 +104,23 @@ def CERRADURA(I, grammar):
 
                 dot_po = item[1].index(".")
 
-                if dot_po + 1 < len(item[1]):
+
+                if dot_po + 1 < len(prod):
                     # print("Derecha del punto: ", item[1][dot_pos + 2])
 
                     # print("Gramática: ", grammar)
+                    # print("Viendo que hay después del punto: ", item[1][dot_pos + 2])
+
+                    # # Si lo que hay después del punto está vacío, entonces se imprime lo que está dos espacios después.
+                    # if prod[dot_po + 1] == " ":
+
+                    #     print("Imprimiendo lo de dos espacios después: ", prod[dot_po + 2])
+                    
+                    # else: 
+                        
+                    #     print("Imprimiendo lo de un espacio después: ", prod[dot_po + 1])
+
+
 
                     # Buscando en la derecha de la regla todo lo que empiece con item[1][dot_pos + 2].
                     for rule in grammar.productions:
@@ -141,6 +160,46 @@ def CERRADURA(I, grammar):
                                 #print("No hay transición", item[1][dot_pos + 2])
                                 corazon = Corazon(simbolo, prod[:dot_pos] + prod[dot_pos:])
                                 estados[corazon] = set()
+                
+                    # Buscando los restos del corazón que se acaba de hacer.
+                    for rule in grammar.productions:
+                        #print("Símbolo para hacerle su resto: ", simbolo)
+
+                        # Imprimiendo lo que está a la derecha del punto.
+                        #print("Símbolo para hacerle resto: ", prod[dot_pos + 1])
+
+                        if prod[dot_pos + 1] == " ":
+                            # Imprimiendo dos espacios después.
+                            #print("Símbolo para hacerle resto: ", prod[dot_pos + 2])
+
+                            # Buscando en las reglas todo lo que empiece con prod[dot_pos + 2].
+                            if rule[0] == prod[dot_pos + 2]:
+                                
+                                print("Regla: ", rule, " prod: ", prod[dot_pos + 2])
+
+                                # Creando una copia de la regla.
+                                s = rule.copy()
+
+                                # Agregando el punto al principio de la regla.
+                                s[1] = "." + s[1]
+
+                                print("S: ", s)
+
+                                # Creando un resto.
+                                res = Resto(simbolo, s[1])
+
+                                #print("Derecha del resto: ", res.derecha.index("."))
+
+                                # Guardando en el corazón de la producción los restos.
+                                estados[corazon].add(res)
+
+                                # # Imprimiendo las reglas que empiezan con prod[dot_pos + 2].
+                                # print("Regla: ", rule[0])
+                                
+                        
+                        else:
+
+                            print("Símbolo para hacerle resto tomando un espacio: ", prod[dot_pos + 1])
 
                 # else:
                 #     print("No hay nada a la derecha del punto.")
@@ -148,59 +207,19 @@ def CERRADURA(I, grammar):
                 # Imprimiendo el elemento que está a la izquierda del punto.
                 #print("Símbolo en dot_pos > 0: ", prod[dot_pos - 1])
 
-                if prod[dot_pos - 1] == "d":
-                    
-                    # Imprimiendo el elemento sin el punto.
-                    #print("Símbolo en dot_pos > 0: ", prod[:dot_pos])
-
-                    # Buscando en la derecha de la regla todo lo que empiece con prod[:dot_pos].
-                    for rule in grammar.productions:
-                        if rule[1][0] == "i":
-                            #print("Regla del id: ", rule[1][0:])
-                            
-                            if prod[:dot_pos] == rule[1][0:]: # Creando corazones.
-
-                                #print("prod: ", prod[:dot_pos], " rule: ", rule[1][0:])
-
-                                corazon = Corazon(simbolo, prod[:dot_pos] + prod[dot_pos:])
-
-                                #print("Nuevo corazón: ", corazon)
-
-                                estados[corazon] = set()
-                        
-                        else: 
-                            #print("Regla: ", rule[1][0])
-
-                            if prod[:dot_pos] == rule[1][0]: # Creando corazones.
-
-                                #print("prod: ", prod[:dot_pos], " rule: ", rule[1][0])
-                                
-                                corazon = Corazon(simbolo, prod[:dot_pos] + prod[dot_pos:])
-
-                                estados[corazon] = set()
-
-                                #print("Corazón en el else de id: ", corazon)
-
-                else: 
-                    #print("Símbolo en dot_pos > 0: ", prod[dot_pos - 1])
-                    
-                    for rule in grammar.productions:
-                        
-                       # print("Regla: ", rule[1][0])
-
-                        #print("producción: ", prod[:dot_pos]," regla: ",  rule[1][0])
-
-                        if prod[:dot_pos] == rule[1][0]: # Creando corazones.
-                            corazon = Corazon(simbolo, prod[:dot_pos] + prod[dot_pos:])
-
-                            #print("Nuevo corazón: ", corazon)
-
-                            estados[corazon] = set()
-
             # Si el punto está a la izquierda, entonces es un resto.
             if dot_pos == 0:
+                
+                # Imprimiendo lo que hay después del punto.
+                #print("Resto: ", prod[dot_pos + 1:])
+
+
                 if simbolo != "E'" and prod != ".E":
                     resto = Resto(simbolo, prod)
+
+                    # Resto en cerradura.
+                    #print("Resto en cerradura: ", resto)
+
                     # Buscar todas las producciones que empiecen con el elemento que está a la derecha del punto.
                     for rule in grammar.productions:
 
@@ -245,13 +264,22 @@ def CERRADURA(I, grammar):
                                 estados[corazon].add(resto)
 
                                 #added = True
+                # else: 
+
+                #     print("Otro caso para agregar el resto: ", " símbolo: ", simbolo, " prod: ", prod)
 
     # # Imprimiendo los estados.
     # for corazon, resto in estados.items():
     #     print("Corazón en CERRADURA: ", corazon)
-    #print("")
 
-    #print("Estados: ", estados, " J: ", J)
+    #     for r in resto: 
+    #         print("Resto en CERRADURA: ", r)
+
+    # print("")
+
+    #print(" J: ", J)
+    # for esta in estados: 
+    #     print("Esta: ", esta)
 
     return estados
 
@@ -267,16 +295,8 @@ def ir_A(I, X, gramatica):
         todas las producciones en I que tienen a X después del punto.
     """
     J = []
-    #print("Símbolo al inicio: ", X)
-    #print("Conjunto: ", I)
-    # print("Símbolo antes de imprimir el elemento sa: ", X)
-    # for ca, sa in I.items(): 
-    #     print("Corazón del elemento I: ", ca)
-
-    #     for a in sa:
-    #         print("Resto del elemento I: ", a)
     
-    # print("")
+    # print("Conjunto: ", I, " símbolo: ", X)
 
     lista_temp = []
 
@@ -300,37 +320,45 @@ def ir_A(I, X, gramatica):
 
         # Revisando que hay a la derecha del punto para ver lo si hay movimiento.
         if dot_pos < len(corazon.derecha) - 1:
+            
+            """
 
-            # Verificando el símbolo de la derecha del punto. (aún falta detectar el caso de id)
-            if corazon.derecha[dot_pos + 1] == X:
-                #print("Sí hay corrimiento. ", corazon.derecha[dot_pos + 1], X)
+                Verificar si hay espacio vacío y si lo hay revisar los símbolos después de ese.
+
+            """
+
+            #print("corazon.derecha: ", corazon.derecha[dot_pos + 1])
+
+            # Si hay un espacio vacío, revisar si hay elementos después del espacio vacío.
+            if corazon.derecha[dot_pos + 1] == ' ':
                 
-                # Mover el punto a la derecha del símbolo.
-                corazon.derecha = corazon.derecha[:dot_pos] + corazon.derecha[dot_pos + 1] + '.' + corazon.derecha[dot_pos + 2:]
+                #print("corazon.derecha después del espacio: ", corazon.derecha[dot_pos + 2], " X: ", X, " conjunto: ", I)
 
-                #print("Corazón antes del for: ", corazon)
+                # Verificando si el X es igual al corazon.derecha[dot_pos + 2].
 
-                cora = [corazon.izquierda, corazon.derecha]
+                if corazon.derecha[dot_pos + 2] == X:
 
-                if corazon not in J: # Guardando el corazón.
-                    J.append(cora)
+                    #print("corazon.derecha: ", corazon.derecha[dot_pos + 2], " X: ", X)
 
-                # Buscar en la gramática las partes derechas de las producciones.
-                for rule in gramatica.productions:
-                        # Aún falta detectar el caso de id.
-                        #print("Regla: ", rule[1])
+                    # Moviendo el punto a la derecha del símbolo.
+                    corazon.derecha = corazon.derecha[:dot_pos] + " " + corazon.derecha[dot_pos + 2] + '.' + "" + corazon.derecha[dot_pos + 3:]
 
-                        inicio = rule[1][0] # Agarrando el inicio de la regla.
+                    #print("Nuevo corazón cuando habían dos espacios: ", corazon)
 
-                        # Si el inicio es igual a i, entonces se jala la palabra completa.
-                        if inicio == "i":
+                    cora = [corazon.izquierda, corazon.derecha]
+
+                    #print("Nuevo corazón cuando habían dos espacios: ", cora)
+
+                    if cora not in J:
+                        J.append(cora)
+                    
+                    for rule in gramatica.productions: 
+                        inicio = rule[1][0]
+
+                        if inicio == "i": # Detectando el id.
                             inicio = rule[1][0:]
                         
-                        #print("Inicio: ", inicio)
-
-                        if inicio == X: # Si el inicio es igual a X, entonces eso será un corazón.
-                            #print("Posible corazón: ", rule, " X: ", X, " inicio: ", inicio)
-
+                        if inicio == X:
                             # Falta detectar el id.
 
                             # Obteniendo el índice del punto.
@@ -349,15 +377,73 @@ def ir_A(I, X, gramatica):
 
                             #print("Cora: ", cora)
 
-                            #print("Corazón: ", corazon)
+                            # print("Corazón: ", corazon)
 
-                            if corazon not in J: # Guardando el corazón.
+                            if cora not in J: # Guardando el corazón.
                                 J.append(cora)
 
-                            # # Poniendo el punto a la derecha del símbolo y luego imprimiendo la regla.
-                            # rule[1] = rule[1][:dot_pos] + rule[1][dot_pos + 1] + '.' + rule[1][dot_pos + 2:]
 
-                            # print("Regla después de mover el punto: ", rule)
+            else: 
+
+                # Verificando el símbolo de la derecha del punto. (aún falta detectar el caso de id)
+                if corazon.derecha[dot_pos + 1] == X:
+                    #print("Sí hay corrimiento. ", corazon.derecha[dot_pos + 1], X)
+                    
+                    # Mover el punto a la derecha del símbolo.
+                    corazon.derecha = corazon.derecha[:dot_pos] + " " + corazon.derecha[dot_pos + 1] + '.' + corazon.derecha[dot_pos + 2:]
+
+                    #print("Corazón antes del for: ", corazon)
+
+                    cora = [corazon.izquierda, corazon.derecha]
+
+                    #print("Nuevo corazón: ", cora)
+
+                    if cora not in J: # Guardando el corazón.
+                        J.append(cora)
+
+                    # Buscar en la gramática las partes derechas de las producciones.
+                    for rule in gramatica.productions:
+                            # Aún falta detectar el caso de id.
+                            #print("Regla: ", rule[1])
+
+                            inicio = rule[1][0] # Agarrando el inicio de la regla.
+
+                            # Si el inicio es igual a i, entonces se jala la palabra completa.
+                            if inicio == "i":
+                                inicio = rule[1][0:]
+                            
+                            #print("Inicio: ", inicio)
+
+                            if inicio == X: # Si el inicio es igual a X, entonces eso será un corazón.
+                                #print("Posible corazón: ", rule, " X: ", X, " inicio: ", inicio)
+
+                                # Falta detectar el id.
+
+                                # Obteniendo el índice del punto.
+                                dot_pos = rule[1].index(X)
+
+                                #print("Posición de X: ", X)
+
+                                derecha = rule[1][:dot_pos] + rule[1][dot_pos] + '.' + rule[1][dot_pos + 1:]
+
+                                #print("Nuevo corazón lado derecho: ", rule)
+
+                                # Convirtiendo el rule en corazón.
+                                corazon = Corazon(rule[0], derecha)
+
+                                cora = [rule[0], derecha]
+
+                                #print("Cora: ", cora)
+
+                                #print("Corazón: ", corazon)
+
+                                if cora not in J: # Guardando el corazón.
+                                    J.append(cora)
+
+                                # # Poniendo el punto a la derecha del símbolo y luego imprimiendo la regla.
+                                # rule[1] = rule[1][:dot_pos] + rule[1][dot_pos + 1] + '.' + rule[1][dot_pos + 2:]
+
+                                # print("Regla después de mover el punto: ", rule)
 
 
                 #print("Corazón después de mover el punto: ", corazon)
@@ -413,8 +499,6 @@ def ir_A(I, X, gramatica):
 
                             if cora not in J:
                                 J.append(cora)
-
-        #print("Posición del punto: ", dot_pos, "resto: ", resto, " símbolo: ", X)
         
 
     # Eliminando repeticiones de J.
@@ -425,7 +509,7 @@ def ir_A(I, X, gramatica):
 
     #print("J: ", J)
 
-    # if J: 
+    # if J:
     #     print("J: ", J)
 
     #a = CERRADURA(J, gramatica)
@@ -486,13 +570,18 @@ def construir_automata_LR0(grammar): # Construcción de la gramática.
 
             for X in simbolos_gram:
                 
-                #conjunto_copia = copy.deepcopy(conjunto)
+                conjunto_copia = copy.deepcopy(conjunto)
 
-                #goto = ir_A(conjunto_copia, X, gramatica)
+                goto = ir_A(conjunto_copia, X, gramatica)
 
-                goto = ir_A(conjunto, X, gramatica)
+                #print("Conjunto: ", conjunto)
 
-                #print("Goto: ", goto, " símbolo: ", X)
+                # print("Conjunto: ", conjunto)
+                # for cora, res in conjunto.items():
+                #     print("Corazón: ", cora)
+
+                #goto = ir_A(conjunto, X, gramatica)
+
 
                 if goto and goto not in C:
                     #print("Goto: ", goto)
@@ -504,10 +593,14 @@ def construir_automata_LR0(grammar): # Construcción de la gramática.
                     
                     # print("")
 
+                    #print("Conjunto: ", conjunto, " X: ", X, " resultado ", goto)
+
+                    tabla.append([conjunto, X, goto])
+
                     C.append(goto)
 
                     agregado = True
-
+    
     for estado in C:
         #pass
         print("Estado: ", estado)
@@ -517,6 +610,11 @@ def construir_automata_LR0(grammar): # Construcción de la gramática.
 
             for r in resto:
                 print("Resto: ", r)
+    
+    print("Estados: ", len(C))
+
+    # for estadi in C:
+    #     print(estadi)
 
     return tabla
 
@@ -531,3 +629,72 @@ grammar = Grammar([
 ]) # Gramática a utilizar.
 
 tabla = construir_automata_LR0(grammar)
+
+
+# print(tabla)
+
+graph = pydot.Dot(graph_type='digraph')
+
+# Creando los nodos.
+nodes = set()
+for lista in tabla:
+    #print(lista)
+
+        #print(tupla[0])
+
+    # Convertir cada lista en la posición 0 de la lista a tupla si en caso no lo es.
+    if type(lista[0]) == tuple:
+        #nodes.add(lista[0])
+        pass
+    elif type(lista[0]) == list:
+        tupla_general0 = tuple(tuple(lista) for lista in lista[0])
+
+        #print(tupla_general0)
+        nodes.add(tupla_general0)
+    
+    # Convertir cada lista en la posición 2 de la lista a tupla si en caso no lo es.
+    if type(lista[2]) == tuple:
+        pass
+    elif type(lista[2]) == list:
+        tupla_general2 = tuple(tuple(lista) for lista in lista[2])
+
+        #print(tupla_general2)
+        nodes.add(tupla_general2)
+
+# Agregando los nodos a la estructura de datos.
+for node in nodes:
+
+    #print("Nodo: ", node)
+
+    graph.add_node(pydot.Node(str(node)))
+
+# Haciendo las conexiones.
+for lista in tabla:
+    
+    tupla0 = lista[0]
+    tupla2 = lista[2]
+    etiqueta = lista[1]
+
+    # print("Tupla0: ", tupla0)
+    # print("Tupla2: ", tupla2)
+    # print("Etiqueta: ", etiqueta)
+    
+
+    # Conversión de la lista[0] en caso de que sea necesario.
+    if type(lista[0]) == tuple:
+        tupla0 = lista[0]
+    elif type(lista[0]) == list:
+        tupla0 = tuple(tuple(lista) for lista in lista[0])
+
+    # Conversión de la lista[2] en caso de que sea necesario.
+    if type(lista[2]) == tuple:
+        tupla2 = lista[2]
+    elif type(lista[2]) == list:
+        tupla2 = tuple(tuple(lista) for lista in lista[2])
+    
+    graph.add_edge(pydot.Edge(str(tupla0), str(tupla2), label=str(etiqueta)))
+
+    # Poniendo el grafo de manera vertical.
+    #graph.set_rankdir("LR")
+    
+    graph.write_png('GramáticaA1.png')

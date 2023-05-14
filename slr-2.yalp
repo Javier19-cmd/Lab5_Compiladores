@@ -29,5 +29,4 @@ term:
 factor:
     LPAREN expression RPAREN
   | ID
-  | NUMBER
 ;

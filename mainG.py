@@ -4,9 +4,10 @@ from GrammarA import *
 import re
 from io import StringIO
 import pydot
+from Grammar import *
 
-yapar = "slr-2.yalp" # Variable que guarda el nombre del yapar.
-yalex = "slr-2.yal" # Variable que guarda el nombre del yalex.
+yapar = "slr-1.yalp" # Variable que guarda el nombre del yapar.
+yalex = "slr-1.yal" # Variable que guarda el nombre del yalex.
 
 lista_tk = [] # Tokens del yalex.
 lista_tkyp = [] # Tokens del yapar.
@@ -31,6 +32,12 @@ with open(yapar) as y:
             if yalp[i] == "/" and yalp[i+1] == "*":
                 print("Error: Cantidad de comentarios /* y */ no coinciden en la línea " + str(i+1) + ".")
                 break
+    
+    # Verificando que exista la misma cantidad de ; que de :.
+
+    if yalp.count(";") != yalp.count(":"):
+        print("Punto y coma o dos puntos incosistentes")
+        #print("Error: Cantidad de ; y : no coinciden.")
 
     tokens = re.findall(r'(?<=\n)%token\s+[^%\s][^\n]*', yalp)
 
@@ -178,21 +185,6 @@ with open(yapar) as y:
         
         print("Tokens a operar en la gramática: ", lista_tkyp)
 
-        # Constuir la gramática a partir del archivo.
-
-        # Viendo todo lo que está después del %% en el archivo.
-        #print("Todo lo que está después del %%: ", yapar[yapar.find("%%")+2:])
-
-        #print("Producciones: ", producciones)
-
-        # # Cerrando el archivo.
-        # y.close()
-        # ya.close()
-
-        #print(yaparr)
-
-        # Imprimiendo todo lo que está después del %%.
-        #print("Todo lo que está después del %%: ", yaparr[yaparr.find("%%")+2:])
 
         despues = yaparr[yaparr.find("%%")+2:]
 
@@ -291,23 +283,13 @@ with open(yapar) as y:
                     converted_production.append(' '.join(converted_words))
             converted_grammar.append(converted_production)
 
-        #print(converted_grammar)
+        #print("Gramática convertida: ", converted_grammar)
+
+        converted_grammar = Grammar(converted_grammar)
+        print("Gramática: ", converted_grammar)
 
         tabla = construir_automata_LR0(converted_grammar)
 
-        # for sublist in tabla: 
-        #     for item in sublist: 
-        #         for i in item: 
-        #             print(i)
-            #print()
-
-        # # Pasar la tabla a un diccionario.
-        # tabla_dic = {}
-
-        # for i in range(len(tabla)):
-        #     tabla_dic[i] = tabla[i]
-
-        # print(tabla_dic)
 
         # Imprimiendo hacia abajo la tabla.
         for i in tabla:
@@ -383,55 +365,7 @@ with open(yapar) as y:
 
         # Poniendo el grafo de manera vertical.
         graph.set_rankdir("LR")
+
+        # Guardando el archivo.
+        graph.write_png('Gramática.png')
         
-
-
-        # # Convertir cada lista en la posición 0 de la lista a tupla si en caso no lo es.
-        # if type(lista[0]) == tuple:
-        #     #nodes.add(lista[0])
-        #     pass
-        # elif type(lista[0]) == list:
-        #     tupla_general0 = tuple(tuple(lista) for lista in lista[0])
-
-        #     #print(tupla_general0)
-        #     #nodes.add(tupla_general0)
-        
-        # # Convertir cada lista en la posición 2 de la lista a tupla si en caso no lo es.
-        # if type(lista[2]) == tuple:
-        #     print("Tupla: ", lista[2])
-        # elif type(lista[2]) == list:
-        #     tupla_general2 = tuple(tuple(lista) for lista in lista[2])
-
-            #print(tupla_general2)
-            #nodes.add(tupla_general2)
-        
-        #print(tupla_general0, lista[1], tupla_general2)
-
-        # print(tupla_general2)
-
-        # print(lista[1])
-
-        # graph.add_edge(pydot.Edge(str(tupla_general0), str(tupla_general2), label=str(lista[1])))
-    
-    # Dibujando el grafo.
-    graph.write_png('Gramática.png')
-
-        #print(tupla)
-        
-        #nodes.add(tupla_convertida)
-
-
-        #print(tabla)
-
-        # grammar2 = [
-        #     ["E", "E + T"],
-        #     ["E", "T"],
-        #     ["T", "T * F"],
-        #     ["T", "F"],
-        #     ["F", "( E )"],
-        #     ["F", "id"]
-        # ] # Gramática a utilizar.
-
-        # tabla2 = construir_automata_LR0(grammar2)
-
-        # print(tabla2)
