@@ -17,3 +17,6 @@ class Grammar:
     
     def __iter__(self):
         return iter(self.productions)
+    
+    def __len__(self):
+        return len(self.productions)

@@ -364,7 +364,7 @@ with open(yapar) as y:
         graph.add_edge(pydot.Edge(str(tupla0), str(tupla2), label=str(etiqueta)))
 
         # Poniendo el grafo de manera vertical.
-        graph.set_rankdir("LR")
+        #graph.set_rankdir("LR")
 
         # Guardando el archivo.
         graph.write_png('Gramática.png')
