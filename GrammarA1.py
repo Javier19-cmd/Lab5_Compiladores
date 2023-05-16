@@ -917,19 +917,19 @@ def siguiente(no_terminal, gramatica):
     
     # print("No terminales: ", no_terminales)
 
-grammar = Grammar([
-    ["E", "E + T"],
-    ["E", "T"],
-    ["T", "T * F"],
-    ["T", "F"],
-    ["F", "( E )"],
-    ["F", "id"]
-]) # Gramática a utilizar.
+# grammar = Grammar([
+#     ["E", "E + T"],
+#     ["E", "T"],
+#     ["T", "T * F"],
+#     ["T", "F"],
+#     ["F", "( E )"],
+#     ["F", "id"]
+# ]) # Gramática a utilizar.
 
-tabla = construir_automata_LR0(grammar)
+# tabla = construir_automata_LR0(grammar)
 
 
-# print(tabla)
+# # print(tabla)
 
 # graph = pydot.Dot(graph_type='digraph')
 

@@ -3,6 +3,10 @@ from Grammar import *
 from EstadosLR import *
 import copy
 import pydot
+import sys
+
+new_limit = 9000  # Nuevo límite de recursión deseado
+sys.setrecursionlimit(new_limit)
 
 tabla = []
 
@@ -175,7 +179,8 @@ def CERRADURA(I, grammar):
                             #print("Regla: ", rule[1][0], " producción: ", prod[dot_pos + 2])
 
                             if rule[1][0] == prod[dot_pos + 2]:
-                                print("Igualdad: ", " Regla: ", rule[1][0], " producción: ", prod[dot_pos + 2])
+                                #print("Igualdad: ", " Regla: ", rule[1][0], " producción: ", prod[dot_pos + 2])
+                                pass
 
                             """
                             Si el prod[dot_pos + 2] es igual a rule[1][0], entonces agarrar recursivamente todo lo que empiece con prod[dot_pos + 2]
@@ -200,10 +205,10 @@ def CERRADURA(I, grammar):
                                     # Creando un resto.
                                     res = Resto(simbolo, s[1])
 
-                                    print("Nuevo resto: ", res)
+                                    #print("Nuevo resto: ", res)
 
                                     # Agarrando también lo que sea igual a la derecha del punto del nuevo resto.
-                                    print("Derecha del punto del nuevo resto: ", res.derecha[res.derecha.index(".") + 1])
+                                    #print("Derecha del punto del nuevo resto: ", res.derecha[res.derecha.index(".") + 1])
 
                                     # #print("Derecha del resto: ", res.derecha.index("."))
 
@@ -242,7 +247,7 @@ def CERRADURA(I, grammar):
                                                 # Agregando el punto al principio de la regla.
                                                 s2[1] = "." + s2[1]
 
-                                                print("S2: ", s2)
+                                                #print("S2: ", s2)
 
                                                 # Haciendo otro resto.
                                                 res2 = Resto(s[0], s[1])
@@ -686,19 +691,308 @@ def construir_automata_LR0(grammar): # Construcción de la gramática.
 
                     agregado = True
 
-    for estado in C:
-        #pass
-        print("Estado: ", estado)
+    # for estado in C:
+    #     #pass
+    #     print("Estado: ", estado)
 
-        for corazon, resto in estado.items():
-            print("Corazón: ", corazon)
+    #     for corazon, resto in estado.items():
+    #         print("Corazón: ", corazon)
 
-            for r in resto:
-                print("Resto: ", r)
+    #         for r in resto:
+    #             print("Resto: ", r)
 
-    print("Estados: ", len(C))
+    # print("Estados: ", len(C))
+
+    #print("Gramática: ", gramatica)
+
+    # print("len(gramatica): ", len(gramatica))
+
+    # pri_r = []
+    # sig_r = []
+    
+    # Recorriendo la gramática aumentada.
+    for produccion in gramatica.productions:
+        
+        #print("Parte izquierda: ", produccion[0], " Parte derecha: ", produccion[1])
+
+        no_terminal = produccion[0] # Agarrando el símbolo no terminal de la producción.
+
+        #print("No terminal: ", no_terminal, " gramática: ", gramatica.productions)
+        
+        resultado = primero(no_terminal, gramatica)
+        print("Símbolo: ", no_terminal, " Resultado1: ", resultado)
+
+        # if resultado not in pri_r:
+        #     pri_r.append(resultado)
+
+        # print("Símbolo: ", no_terminal, " Resultado de primero: ", resultado)
+
+        
+    
+    for produccion2 in gramatica.productions: 
+
+        no_terminal2 = produccion2[0]
+
+        resultado2 = siguiente(no_terminal2, gramatica)
+
+        print("Símbolo: ", no_terminal, " Resultado2: ", resultado2)
+
+        # if resultado2 not in sig_r:
+        #     sig_r.append(resultado2)
+
+        # print("Símbolo: ", no_terminal, " resultado de siguiente: ", resultado2)
 
     # for estadi in C:
     #     print(estadi)
 
+    # for res1 in pri_r:
+    #     print(res1)
+    
+    # print("")
+
+    # for res2 in sig_r:
+    #     print(res2)
+    
+    # print("")
+
+
     return tabla
+
+
+# Definiendo la función primero.
+def primero(no_terminal, gramatica):
+    """
+        Pasos a seguir para usar esta función.
+        1. Recibir el símbolo no terminal que se va a operar y la gramática aumentada.
+        2. Recorrer las producciones del símbolo no terminal y por cada producción revisar si el primer símbolo es un símbolo terminal o no. Si el símbolo es terminal, entonces 
+           agregarlo al conjunto primero del no terminal actual. Si es un símbolo no terminal, calcular su conjunto "primero" y agregarlo al conjunto primero del no termnal actual. 
+           Si la producción tiene un símbolo no terminal que deriva la cadena vacía agregar el conjunto "primero" del siguiente símbolo no terminal en la producción al conjunto 
+           "primero" del no terminal actual.
+    """
+
+    #print("No terminal: ", no_terminal, " gramática: ", gramatica.productions)
+
+    # Recorriendo las producciones del no terminal.
+
+    no_terminales = []
+
+    primeros = []
+
+    # Guardando los no terminales en una lista. Los no terminales son los que están a la izquierda de la producción.
+    for produccions in gramatica.productions:
+
+        if produccions[0] not in no_terminales:
+
+            no_terminales.append(produccions[0])
+    
+    #print("No terminales: ", no_terminales)
+
+    for produccion in gramatica.productions:
+        
+        simbolo = produccion[0]
+        resto = produccion[1]
+
+        #print("no_terminal: ", no_terminal,  "símbolo: ", simbolo, " resto: ", resto)
+
+        # Revisando el primer símbolo de la producción.
+        #print("Primer símbolo: ", resto[0])
+
+        if no_terminal == simbolo:
+
+            psimbolo = resto[0]
+
+            if psimbolo == "i":
+
+                psimbolo = resto[0:]
+
+            #print("Primer símbolo: ", psimbolo)
+
+            # Si el primer símbolo es un símbolo terminal, agregarlo al conjunto primero del no terminal actual.
+
+            if psimbolo not in no_terminales or psimbolo == " ":
+
+                #print("Símbolo no terminal: ", psimbolo)
+
+                primeros.append(psimbolo)
+
+            elif psimbolo in no_terminales: 
+                #print("No terminal detectado: ", psimbolo)
+
+                # Recorriendo las producciones del símbolo.
+                for produccions in gramatica.productions:
+                    
+                    # Haciendo el primero nuevamente.
+
+                    si = produccions[0]
+                    re = produccions[1]
+
+                    if si == psimbolo:
+                        ps = re[0]
+
+                        if ps == "i":
+                            ps = re[0:]
+
+                            if ps not in no_terminales or ps == "":
+                                primeros.append(ps)
+                            
+                            else:
+
+                                # Obteniendo el siguiente símbolo.
+
+
+                                primeros.append("")
+
+
+
+                # # Calculando nuevamente la función primero.
+                # primer = primero(psimbolo, gramatica)
+
+                #print("Primero nuevamente: ", primer)
+            
+        
+    #print("Símbolo: ", no_terminal, " resultado: ", primeros)
+
+    return primeros
+
+# Método para calcular el siguiente.
+def siguiente(no_terminal, gramatica):
+
+    siguientes = []
+
+    if no_terminal == "E": 
+        siguientes.append("$")
+    
+    for production in gramatica.productions: 
+        
+        simbolo = production[0]
+        resto = production[1]
+
+        # Si el símbolo está al final de las producciones, entonces agregar la producción al conjunto siguiente.
+
+        # Reconociendo el último elemento del resto.
+        ultimo = resto[-1]
+
+        # Si ultimo es igual a d, entonces se jala toda la palabra.
+        if ultimo == "d":
+            ultimo = resto[0:]
+
+        #print("Último elemento de la producción: ", ultimo)
+
+        if no_terminal == ultimo:
+                
+            #print("No terminal: ", no_terminal, " último: ", ultimo)
+
+            # Agregar la producción al conjunto siguiente.
+            siguientes.append(production)
+
+            #print("Siguiente: ", siguientes)
+        
+        # Reconociendo el medio del resto.
+        medio = resto[:0] + resto[0:]
+
+        # Obteniendo la mitad de lo anterior.
+        medio = medio[1:-1]
+
+        # Si el no terminal está en el medio de la producción, entonces agregar el conjunto primero del siguiente símbolo al conjunto siguiente del no terminal actual.
+        if no_terminal in medio:
+            
+            #print("Medio: ", medio)
+            
+            sig = primero(no_terminal, gramatica)
+
+            #print("Primero del siguiente: ", sig)
+
+            siguientes.append(sig)
+        
+
+        # Si el resto es "", entonces agregar vacío.
+        if resto == "":
+            siguientes.append("")
+        
+    #print("Símbolo: ", no_terminal, " siguiente: ", siguientes)
+
+    return siguientes
+
+
+    
+    # print("No terminales: ", no_terminales)
+
+# grammar = Grammar([
+#     ["E", "E + T"],
+#     ["E", "T"],
+#     ["T", "T * F"],
+#     ["T", "F"],
+#     ["F", "( E )"],
+#     ["F", "id"]
+# ]) # Gramática a utilizar.
+
+# tabla = construir_automata_LR0(grammar)
+
+
+# # print(tabla)
+
+# graph = pydot.Dot(graph_type='digraph')
+
+# # Creando los nodos.
+# nodes = set()
+# for lista in tabla:
+#     #print(lista)
+
+#         #print(tupla[0])
+
+#     # Convertir cada lista en la posición 0 de la lista a tupla si en caso no lo es.
+#     if type(lista[0]) == tuple:
+#         #nodes.add(lista[0])
+#         pass
+#     elif type(lista[0]) == list:
+#         tupla_general0 = tuple(tuple(lista) for lista in lista[0])
+
+#         #print(tupla_general0)
+#         nodes.add(tupla_general0)
+
+#     # Convertir cada lista en la posición 2 de la lista a tupla si en caso no lo es.
+#     if type(lista[2]) == tuple:
+#         pass
+#     elif type(lista[2]) == list:
+#         tupla_general2 = tuple(tuple(lista) for lista in lista[2])
+
+#         #print(tupla_general2)
+#         nodes.add(tupla_general2)
+
+# # Agregando los nodos a la estructura de datos.
+# for node in nodes:
+
+#     #print("Nodo: ", node)
+
+#     graph.add_node(pydot.Node(str(node)))
+
+# # Haciendo las conexiones.
+# for lista in tabla:
+
+#     tupla0 = lista[0]
+#     tupla2 = lista[2]
+#     etiqueta = lista[1]
+
+#     # print("Tupla0: ", tupla0)
+#     # print("Tupla2: ", tupla2)
+#     # print("Etiqueta: ", etiqueta)
+
+
+#     # Conversión de la lista[0] en caso de que sea necesario.
+#     if type(lista[0]) == tuple:
+#         tupla0 = lista[0]
+#     elif type(lista[0]) == list:
+#         tupla0 = tuple(tuple(lista) for lista in lista[0])
+
+#     # Conversión de la lista[2] en caso de que sea necesario.
+#     if type(lista[2]) == tuple:
+#         tupla2 = lista[2]
+#     elif type(lista[2]) == list:
+#         tupla2 = tuple(tuple(lista) for lista in lista[2])
+
+#     graph.add_edge(pydot.Edge(str(tupla0), str(tupla2), label=str(etiqueta)))
+
+#     # Poniendo el grafo de manera vertical.
+#     #graph.set_rankdir("LR")
+
+#     graph.write_png('GramáticaA1.png')
